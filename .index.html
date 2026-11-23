@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampoDirecto | ERP Inteligente</title>
+<style>
+:root{
+  --bg:#071b14;--panel:#102b20;--panel2:#153729;--green:#78bd78;
+  --green2:#a6d68b;--text:#eff8ef;--muted:#a1b8a8;
+  --line:rgba(210,240,215,.12);--yellow:#e5ca65;--red:#ef897d;
+  --shadow:0 15px 40px rgba(0,0,0,.22)
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:grid;grid-template-columns:245px 1fr}
+.sidebar{background:rgba(5,25,18,.96);border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:22px}
+.brand{display:flex;align-items:center;gap:10px;padding:5px 8px}
+.brand-logo{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#a4d77c,#276b43);font-size:24px}
+.brand strong{font-size:17px;letter-spacing:.3px}.brand small{display:block;color:var(--green2);font-size:10px;margin-top:3px}
+.menu-label{font-size:10px;color:#789283;text-transform:uppercase;letter-spacing:1.4px;padding:0 12px;margin:5px 0}
+.nav{display:grid;gap:5px}
+.nav button{border:0;background:transparent;color:#b4c9bb;padding:11px 12px;text-align:left;border-radius:10px;display:flex;align-items:center;gap:12px;font-size:13px;transition:.2s}
+.nav button:hover,.nav button.active{background:linear-gradient(90deg,rgba(102,174,105,.28),rgba(102,174,105,.08));color:white}
+.nav button.active{box-shadow:inset 3px 0 var(--green)}
+.nav .ico{width:20px;text-align:center;font-size:16px}
+.sidebar-bottom{margin-top:auto;background:linear-gradient(145deg,#173d2a,#0d291d);border:1px solid var(--line);border-radius:14px;padding:15px}
+.sidebar-bottom p{font-size:11px;color:var(--muted);line-height:1.5}
+.main{min-width:0;padding:18px 25px 35px;background:radial-gradient(ellipse at 55% 5%,rgba(57,116,66,.18),transparent 42%)}
+.topbar{display:flex;align-items:center;gap:15px;margin-bottom:24px}
+.search{flex:1;max-width:460px;position:relative}
+.search input{width:100%;background:#142d22;border:1px solid var(--line);border-radius:30px;padding:12px 18px 12px 42px;color:white;outline:none}
+.search span{position:absolute;left:16px;top:10px;color:#a4b8aa}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:12px}
+.icon-btn{background:#163426;border:1px solid var(--line);color:white;border-radius:50%;width:38px;height:38px}
+.profile{display:flex;align-items:center;gap:9px;font-size:12px}
+.avatar{width:35px;height:35px;border-radius:50%;display:grid;place-items:center;background:#719b68}
+.page-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:20px}
+h1{font-size:23px;margin:0 0 6px}h2{font-size:16px;margin:0 0 5px}h3{font-size:13px;margin:0}
+.subtitle{font-size:12px;color:var(--muted)}
+.date-pill{border:1px solid var(--line);background:#173426;padding:9px 13px;border-radius:20px;color:#c6d7ca;font-size:11px}
+.hero{border:1px solid var(--line);border-radius:18px;min-height:220px;padding:24px;position:relative;overflow:hidden;background:linear-gradient(90deg,rgba(5,28,18,.95),rgba(9,39,24,.66)),url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=85') center/cover;margin-bottom:18px}
+.hero:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;right:8%;top:-130px;background:rgba(147,203,115,.13);filter:blur(5px)}
+.hero-content{position:relative;z-index:1;max-width:560px}
+.hero h2{font-size:25px;margin:8px 0}.hero p{font-size:12px;color:#c3d7c8;line-height:1.7;max-width:500px}
+.eyebrow{font-size:10px;color:var(--green2);letter-spacing:1.5px;text-transform:uppercase}
+.btn{border:0;border-radius:9px;background:var(--green);color:#082014;padding:10px 14px;font-weight:700;font-size:11px}
+.btn:hover{filter:brightness(1.1)}.btn.secondary{background:#244a34;color:#e8f4e8;border:1px solid var(--line)}
+.btn.danger{background:#683a34;color:#ffe8e5}
+.grid{display:grid;gap:14px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:15px}
+.card{background:linear-gradient(145deg,rgba(24,57,40,.94),rgba(14,40,29,.95));border:1px solid var(--line);border-radius:15px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.stat-top{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:11px}
+.stat-icon{width:30px;height:30px;border-radius:9px;background:rgba(126,190,120,.17);display:grid;place-items:center}
+.stat-value{font-size:27px;font-weight:650;margin:12px 0 5px}
+.stat-foot{font-size:10px;color:var(--green2)}
+.content-grid{grid-template-columns:1.4fr 1fr;margin-bottom:15px}
+.chart-placeholder{height:185px;display:flex;align-items:end;gap:9px;padding:15px 5px 3px}
+.bar{flex:1;min-width:8px;border-radius:7px 7px 2px 2px;background:linear-gradient(180deg,#a8d98c,#347b4b);opacity:.85;position:relative}
+.bar span{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted)}
+.progress-row{margin:15px 0}.progress-label{display:flex;justify-content:space-between;font-size:11px;color:#c5d8c9;margin-bottom:7px}
+.progress{height:7px;background:#263f31;border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;border-radius:10px;background:linear-gradient(90deg,#4f9a61,#b3dc82)}
+.list{display:grid;gap:10px;margin-top:13px}
+.list-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;background:rgba(255,255,255,.035);border-radius:9px;font-size:11px}
+.list-item small{display:block;color:var(--muted);margin-top:4px}
+.tag{font-size:9px;padding:5px 8px;border-radius:20px;background:rgba(123,190,119,.15);color:#b8e4a3;white-space:nowrap}
+.tag.warn{background:rgba(229,202,101,.13);color:var(--yellow)}
+.tag.bad{background:rgba(239,137,125,.13);color:var(--red)}
+.section{margin-bottom:17px}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:650px}
+th,td{text-align:left;padding:12px 13px;border-bottom:1px solid var(--line);font-size:11px}
+th{color:#9fb9a7;font-weight:500;background:rgba(255,255,255,.035)}
+td{color:#e3eee5}tr:last-child td{border-bottom:0}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field label{display:block;color:#a9c0b0;font-size:10px;margin-bottom:6px}
+.field input,.field select{width:100%;padding:11px;background:#0b2118;border:1px solid var(--line);border-radius:8px;color:white;outline:none}
+.field.full{grid-column:1/-1}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.empty{padding:25px;text-align:center;color:var(--muted);font-size:12px}
+.twin-scene{min-height:230px;border-radius:14px;overflow:hidden;position:relative;background:linear-gradient(180deg,rgba(7,29,18,.1),rgba(7,29,18,.85)),url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80') center/cover}
+.pin{position:absolute;border:1px solid #d5f4b0;background:#183c27;color:white;padding:7px 10px;border-radius:20px;font-size:10px;box-shadow:0 4px 15px #0007}
+.pin.one{left:18%;top:30%}.pin.two{left:52%;top:55%}.pin.three{right:12%;top:25%}
+.range{width:100%;accent-color:#8bc77b}
+.footer{text-align:center;color:#688272;font-size:10px;padding:20px}
+.mobile-menu{display:none}
+@media(max-width:950px){.app{grid-template-columns:205px 1fr}.stats{grid-template-columns:repeat(2,1fr)}.content-grid{grid-template-columns:1fr}}
+@media(max-width:680px){.app{display:block}.sidebar{display:none;position:fixed;z-index:10;top:0;bottom:0;width:260px}.sidebar.open{display:flex}.main{padding:14px}.mobile-menu{display:block}.profile span{display:none}.page-heading{align-items:flex-start}.hero{padding:19px}.hero h2{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="brand-logo">🌱</div><div><strong>CampoDirecto</strong><small>ERP · CRM · SMART AGRI</small></div></div>
+  <div>
+    <div class="menu-label">Principal</div>
+    <nav class="nav" id="navigation">
+      <button class="active" data-page="dashboard"><span class="ico">▦</span>Dashboard</button>
+      <button data-page="inventario"><span class="ico">📦</span>Inventario</button>
+      <button data-page="compras"><span class="ico">🛒</span>Compras</button>
+      <button data-page="ventas"><span class="ico">💼</span>Ventas</button>
+      <button data-page="proveedores"><span class="ico">🤝</span>Proveedores</button>
+      <button data-page="logistica"><span class="ico">🚚</span>Logística</button>
+      <button data-page="exportaciones"><span class="ico">🌎</span>Exportaciones</button>
+    </nav>
+  </div>
+  <div>
+    <div class="menu-label">Relaciones comerciales</div>
+    <nav class="nav">
+      <button data-page="crm"><span class="ico">👥</span>CRM / Clientes</button>
+      <button data-page="oportunidades"><span class="ico">🎯</span>Oportunidades</button>
+    </nav>
+  </div>
+  <div>
+    <div class="menu-label">Inteligencia agrícola</div>
+    <nav class="nav">
+      <button data-page="gemelos"><span class="ico">🛰️</span>Gemelos digitales</button>
+      <button data-page="produccion"><span class="ico">🌾</span>Producción y cultivos</button>
+      <button data-page="reportes"><span class="ico">📊</span>Reportes</button>
+      <button data-page="configuracion"><span class="ico">⚙️</span>Configuración</button>
+    </nav>
+  </div>
+  <div class="sidebar-bottom">
+    <strong style="font-size:12px">✦ CampoDirecto IA</strong>
+    <p>Centraliza la información agrícola y apoya tus decisiones comerciales.</p>
+    <button class="btn secondary" style="width:100%" onclick="showPage('gemelos')">Explorar inteligencia</button>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <button class="icon-btn mobile-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <div class="search"><span>⌕</span><input id="globalSearch" placeholder="Buscar productos, clientes, operaciones..."></div>
+    <div class="top-actions">
+      <button class="icon-btn" title="Notificaciones" onclick="alert('No tienes nuevas notificaciones.')">♧</button>
+      <div class="profile"><div class="avatar">CD</div><span>Administración<br><small style="color:var(--muted)">CampoDirecto</small></span></div>
+    </div>
+  </header>
+  <div id="pageContent"></div>
+  <div class="footer">CampoDirecto · Plataforma de gestión agrícola inteligente · Ecuador</div>
+</main>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const money=n=>new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(Number(n)||0);
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem('cd_'+k))||d}catch{return d}};
+const save=(k,v)=>localStorage.setItem('cd_'+k,JSON.stringify(v));
+
+let products=load('products',[
+ {id:1,name:'Papa súper chola',sku:'PAP-001',category:'Tubérculos',unit:'Quintal',stock:180,min:50,cost:24,location:'Bodega A'},
+ {id:2,name:'Maíz amarillo',sku:'MAI-002',category:'Granos',unit:'Quintal',stock:95,min:40,cost:21,location:'Bodega B'},
+ {id:3,name:'Fréjol canario',sku:'FRE-003',category:'Legumbres',unit:'Quintal',stock:18,min:30,cost:68,location:'Bodega A'},
+ {id:4,name:'Cebolla colorada',sku:'CEB-004',category:'Hortalizas',unit:'Saco',stock:65,min:25,cost:18,location:'Bodega C'},
+ {id:5,name:'Tomate de árbol',sku:'TOM-005',category:'Frutas',unit:'Caja',stock:42,min:20,cost:14,location:'Bodega C'}
+]);
+let clients=load('clients',[
+ {id:1,name:'Mercado Andino S.A.',type:'Comprador',phone:'0990000001',email:'compras@andino.ec',city:'Quito'},
+ {id:2,name:'Productores del Carchi',type:'Productor',phone:'0990000002',email:'productores@carchi.ec',city:'Tulcán'},
+ {id:3,name:'Global Fresh Imports',type:'Comprador internacional',phone:'0990000003',email:'trade@globalfresh.com',city:'Países Bajos'}
+]);
+let movements=load('movements',[]);
+let current='dashboard';
+
+function pageHead(title,sub,action=''){return `<div class="page-heading"><div><h1>${title}</h1><div class="subtitle">${sub}</div></div>${action}</div>`}
+function stat(label,value,foot,icon){return `<div class="card"><div class="stat-top"><span>${label}</span><span class="stat-icon">${icon}</span></div><div class="stat-value">${value}</div><div class="stat-foot">${foot}</div></div>`}
+function showPage(page){
+ current=page;
+ document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+ document.getElementById('sidebar').classList.remove('open');
+ const views={dashboard, inventario, crm, gemelos, reportes, configuracion, compras, ventas, proveedores, logistica, exportaciones, oportunidades, produccion};
+ $('#pageContent').innerHTML=(views[page]||dashboard)();
+}
+function dashboard(){
+ const units=products.reduce((a,p)=>a+Number(p.stock),0);
+ const value=products.reduce((a,p)=>a+p.stock*p.cost,0);
+ const low=products.filter(p=>p.stock<=p.min).length;
+ return `${pageHead('Bienvenido a CampoDirecto 👋','Panel de control de tu empresa agrícola','<span class="date-pill">● Sistema operativo</span>')}
+ <section class="hero"><div class="hero-content"><div class="eyebrow">Plataforma agrícola inteligente</div><h2>Conectamos el campo con los mercados del mundo.</h2><p>Administra inventarios, clientes, producción y exportaciones desde un solo lugar. Convierte los datos de tu negocio agrícola en decisiones más eficientes.</p><button class="btn" onclick="showPage('inventario')">Administrar inventario →</button></div></section>
+ <div class="grid stats">
+ ${stat('Productos registrados',products.length,'Catálogo agrícola','🌱')}
+ ${stat('Unidades disponibles',units.toLocaleString('es-EC'),'Stock total registrado','📦')}
+ ${stat('Alertas de inventario',low,low?'Requieren revisión':'Sin alertas críticas','⚠️')}
+ ${stat('Valor del inventario',money(value),'Estimación a costo registrado','💰')}
+ </div>
+ <div class="grid content-grid">
+ <div class="card"><div class="section-head"><div><h2>Resumen del inventario</h2><div class="subtitle">Existencias por producto</div></div><button class="btn secondary" onclick="showPage('inventario')">Ver inventario</button></div>
+ ${products.slice(0,5).map(p=>`<div class="progress-row"><div class="progress-label"><span>${p.name}</span><b>${p.stock} ${p.unit}</b></div><div class="progress"><i style="width:${Math.min(100,p.stock/Math.max(p.min*3,1)*100)}%"></i></div></div>`).join('')}
+ </div>
+ <div class="card"><div class="section-head"><div><h2>Actividad reciente</h2><div class="subtitle">Movimientos de inventario</div></div><span class="tag">En tiempo real local</span></div>
+ <div class="list">${movements.slice(-5).reverse().map(m=>`<div class="list-item"><div><b>${m.product}</b><small>${m.type} · ${m.date}</small></div><span class="tag">${m.qty} unidades</span></div>`).join('')||'<div class="empty">Todavía no hay movimientos registrados.</div>'}</div>
+ </div></div>
+ <div class="grid content-grid">
+ <div class="card"><h2>Áreas de CampoDirecto</h2><div class="list">
+ ${[['📦','ERP','Gestión de recursos y operaciones'],['👥','CRM','Relación con clientes y productores'],['🛰️','Gemelos digitales','Simulación y monitoreo agrícola'],['🌎','Comercio exterior','Preparación de operaciones de exportación']].map(x=>`<div class="list-item"><div><b>${x[0]} ${x[1]}</b><small>${x[2]}</small></div><span class="tag">Módulo</span></div>`).join('')}</div></div>
+ <div class="card"><h2>Alertas de stock</h2><div class="list">${products.filter(p=>p.stock<=p.min).map(p=>`<div class="list-item"><div><b>${p.name}</b><small>Stock mínimo: ${p.min} ${p.unit}</small></div><span class="tag bad">Stock bajo</span></div>`).join('')||'<div class="empty">No hay productos con stock bajo.</div>'}</div></div></div>`;
+}
+function inventario(){
+ return `${pageHead('Gestión de inventario','Control de productos, existencias, costos y movimientos','<button class="btn" onclick="productForm()">＋ Nuevo producto</button>')}
+ <div class="grid stats">${stat('Productos',products.length,'Referencias registradas','📦')}${stat('Unidades',products.reduce((a,p)=>a+p.stock,0),'Existencias totales','🌾')}${stat('Stock bajo',products.filter(p=>p.stock<=p.min).length,'Productos por reabastecer','⚠️')}${stat('Valor total',money(products.reduce((a,p)=>a+p.stock*p.cost,0)),'Valor estimado','💰')}</div>
+ <div class="card section"><div class="section-head"><div><h2>Catálogo de productos</h2><div class="subtitle">Consulta y administra las existencias agrícolas</div></div><div class="actions"><button class="btn secondary" onclick="exportCSV()">Exportar CSV</button><button class="btn secondary" onclick="movementForm()">Registrar movimiento</button></div></div>
+ <div class="field" style="max-width:350px;margin-bottom:12px"><input id="productSearch" placeholder="Buscar producto o código..." oninput="filterProducts()"></div>
+ <div class="table-wrap"><table><thead><tr><th>Producto</th><th>SKU</th><th>Categoría</th><th>Stock</th><th>Costo unitario</th><th>Valor total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="productRows">${productRows(products)}</tbody></table></div></div>
+ <div class="card"><h2>Historial de movimientos</h2><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Fecha</th><th>Producto</th><th>Movimiento</th><th>Cantidad</th><th>Responsable</th><th>Referencia</th></tr></thead><tbody>${movements.slice().reverse().map(m=>`<tr><td>${m.date}</td><td>${m.product}</td><td>${m.type}</td><td>${m.qty}</td><td>${m.person}</td><td>${m.ref||'—'}</td></tr>`).join('')||'<tr><td colspan="6">Sin movimientos registrados.</td></tr>'}</tbody></table></div></div>`;
+}
+function productRows(arr){return arr.map(p=>`<tr><td><b>${p.name}</b><br><small>${p.location}</small></td><td>${p.sku}</td><td>${p.category}</td><td>${p.stock} ${p.unit}</td><td>${money(p.cost)}</td><td>${money(p.stock*p.cost)}</td><td><span class="tag ${p.stock<=p.min?'bad':''}">${p.stock<=p.min?'Stock bajo':'Disponible'}</span></td><td><div class="actions"><button class="btn secondary" onclick="productForm(${p.id})">Editar</button><button class="btn danger" onclick="deleteProduct(${p.id})">×</button></div></td></tr>`).join('')||'<tr><td colspan="8">No hay productos.</td></tr>'}
+function filterProducts(){let q=$('#productSearch').value.toLowerCase();$('#productRows').innerHTML=productRows(products.filter(p=>(p.name+p.sku+p.category).toLowerCase().includes(q)))}
+function productForm(id){
+ let p=products.find(x=>x.id===id)||{name:'',sku:'',category:'Granos',unit:'Quintal',stock:0,min:10,cost:0,location:'Bodega A'};
+ $('#pageContent').innerHTML=`${pageHead(id?'Editar producto':'Registrar producto','Completa los datos del producto agrícola')}<div class="card"><form class="form-grid" onsubmit="saveProduct(event,${id||'null'})">
+ ${field('Nombre del producto','name',p.name)}${field('Código SKU','sku',p.sku)}${field('Categoría','category',p.category,'select','Tubérculos,Granos,Legumbres,Hortalizas,Frutas,Otros')}${field('Unidad de medida','unit',p.unit,'select','Kilogramo,Quintal,Tonelada,Saco,Caja,Unidad')}${field('Stock disponible','stock',p.stock,'number')}${field('Stock mínimo','min',p.min,'number')}${field('Costo unitario USD','cost',p.cost,'number')}${field('Ubicación','location',p.location)}
+ <div class="field full actions"><button class="btn">Guardar producto</button><button type="button" class="btn secondary" onclick="showPage('inventario')">Cancelar</button></div></form></div>`;
+}
+function field(label,name,value,type='text',options=''){return `<div class="field"><label>${label}</label>${type==='select'?`<select name="${name}">${options.split(',').map(o=>`<option ${o===value?'selected':''}>${o}</option>`).join('')}</select>`:`<input name="${name}" type="${type}" value="${value??''}" ${type==='number'?'min="0" step="any"':''} required>`}</div>`}
+function saveProduct(e,id){e.preventDefault();let f=Object.fromEntries(new FormData(e.target));f.stock=+f.stock;f.min=+f.min;f.cost=+f.cost;
+ if(products.some(p=>p.sku.toLowerCase()===f.sku.toLowerCase()&&p.id!==id)){alert('Ese código SKU ya existe.');return}
+ if(id){products=products.map(p=>p.id===id?{...p,...f}:p)}else{products.push({id:Date.now(),...f})}
+ save('products',products);showPage('inventario')}
+function deleteProduct(id){if(confirm('¿Eliminar este producto del inventario?')){products=products.filter(p=>p.id!==id);save('products',products);showPage('inventario')}}
+function movementForm(){
+ if(!products.length){alert('Primero registra un producto.');return}
+ $('#pageContent').innerHTML=`${pageHead('Registrar movimiento','Entrada, salida o ajuste de existencias')}<div class="card"><form class="form-grid" onsubmit="saveMovement(event)">
+ <div class="field"><label>Producto</label><select name="id">${products.map(p=>`<option value="${p.id}">${p.name} — ${p.stock} ${p.unit}</option>`).join('')}</select></div>
+ ${field('Tipo de movimiento','type','Entrada','select','Entrada,Salida,Ajuste')}${field('Cantidad','qty',1,'number')}${field('Responsable','person','Administrador')}${field('Referencia / motivo','ref','') }
+ <div class="field full actions"><button class="btn">Guardar movimiento</button><button type="button" class="btn secondary" onclick="showPage('inventario')">Cancelar</button></div></form></div>`;
+}
+function saveMovement(e){e.preventDefault();let f=Object.fromEntries(new FormData(e.target)),p=products.find(x=>x.id==f.id),q=+f.qty;if(q<=0)return alert('Ingresa una cantidad válida.');
+ if(f.type==='Salida'&&q>p.stock)return alert('No hay suficiente stock para esta salida.');
+ if(f.type==='Entrada')p.stock+=q;else if(f.type==='Salida')p.stock-=q;else p.stock=q;
+ movements.push({product:p.name,type:f.type,qty:q,person:f.person,ref:f.ref,date:new Date().toLocaleString('es-EC')});
+ save('products',products);save('movements',movements);showPage('inventario')}
+function exportCSV(){let rows=[['Producto','SKU','Categoría','Stock','Unidad','Costo','Ubicación'],...products.map(p=>[p.name,p.sku,p.category,p.stock,p.unit,p.cost,p.location])];let csv=rows.map(r=>r.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(';')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='campodirecto-inventario.csv';a.click();URL.revokeObjectURL(a.href)}
+function crm(){
+ return `${pageHead('CRM · Gestión de relaciones','Administra clientes, productores y compradores','<button class="btn" onclick="clientForm()">＋ Nuevo contacto</button>')}
+ <div class="grid stats">${stat('Contactos',clients.length,'Base comercial','👥')}${stat('Productores',clients.filter(c=>c.type==='Productor').length,'Aliados agrícolas','🌱')}${stat('Compradores',clients.filter(c=>c.type.includes('Comprador')).length,'Mercado nacional e internacional','🌎')}${stat('Oportunidades',load('opps',[]).length,'Negocios registrados','🎯')}</div>
+ <div class="card"><div class="section-head"><div><h2>Directorio comercial</h2><div class="subtitle">Contactos de la red CampoDirecto</div></div></div><div class="table-wrap"><table><thead><tr><th>Nombre / Empresa</th><th>Tipo</th><th>Teléfono</th><th>Correo</th><th>Ciudad / País</th><th>Acciones</th></tr></thead><tbody>${clients.map(c=>`<tr><td><b>${c.name}</b></td><td>${c.type}</td><td>${c.phone}</td><td>${c.email}</td><td>${c.city}</td><td><button class="btn danger" onclick="deleteClient(${c.id})">Eliminar</button></td></tr>`).join('')||'<tr><td colspan="6">No hay contactos.</td></tr>'}</tbody></table></div></div>`;
+}
+function clientForm(){$('#pageContent').innerHTML=`${pageHead('Nuevo contacto','Registra un cliente, productor o comprador')}<div class="card"><form class="form-grid" onsubmit="saveClient(event)">${field('Nombre / Empresa','name','')}${field('Tipo de contacto','type','Productor','select','Productor,Comprador,Comprador internacional,Proveedor')}${field('Teléfono','phone','')}${field('Correo electrónico','email','')}${field('Ciudad / País','city','') }<div class="field full actions"><button class="btn">Guardar contacto</button><button type="button" class="btn secondary" onclick="showPage('crm')">Cancelar</button></div></form></div>`}
+function saveClient(e){e.preventDefault();let f=Object.fromEntries(new FormData(e.target));clients.push({id:Date.now(),...f});save('clients',clients);showPage('crm')}
+function deleteClient(id){if(confirm('¿Eliminar contacto?')){clients=clients.filter(c=>c.id!==id);save('clients',clients);showPage('crm')}}
+function gemelos(){
+ return `${pageHead('Gemelos digitales agrícolas','Representación y simulación de operaciones del negocio','<span class="date-pill">◉ Simulador activo</span>')}
+ <div class="grid content-grid"><div class="card"><div class="section-head"><div><h2>Campo digital · Carchi, Ecuador</h2><div class="subtitle">Vista ilustrativa de unidades agrícolas</div></div><span class="tag">Modelo demostrativo</span></div><div class="twin-scene"><span class="pin one">🌱 Cultivo A</span><span class="pin two">💧 Riego</span><span class="pin three">📍 Cultivo B</span></div><p class="subtitle">Esta vista es una representación visual de ejemplo. Para conectarla con parcelas reales se necesitan sensores, mapas y datos de campo.</p></div>
+ <div class="card"><h2>Simulador de producción</h2><p class="subtitle">Modifica las variables para estimar un escenario de cosecha.</p>
+ <div class="progress-row"><div class="progress-label"><span>Superficie cultivada (ha)</span><b id="haVal">10</b></div><input class="range" id="ha" type="range" min="1" max="100" value="10" oninput="simulate()"></div>
+ <div class="progress-row"><div class="progress-label"><span>Rendimiento estimado (t/ha)</span><b id="yieldVal">4</b></div><input class="range" id="yield" type="range" min="1" max="12" value="4" oninput="simulate()"></div>
+ <div class="progress-row"><div class="progress-label"><span>Factor de eficiencia (%)</span><b id="effVal">85%</b></div><input class="range" id="eff" type="range" min="40" max="100" value="85" oninput="simulate()"></div>
+ <div class="card" style="background:#0b2118;margin-top:15px"><div class="subtitle">Producción potencial estimada</div><div class="stat-value" id="simResult">34 toneladas</div><div class="stat-foot">Estimación matemática, no predicción agronómica.</div></div></div></div>
+ <div class="grid stats">${stat('Inventario modelado',products.length+' productos','Datos del ERP','📦')}${stat('Contactos conectados',clients.length,'Datos del CRM','👥')}${stat('Escenarios', '1','Simulación disponible','🧪')}${stat('Conexión IoT','Pendiente','Sensores no conectados','📡')}</div>
+ <div class="card"><h2>¿Qué puede representar un gemelo digital?</h2><div class="list"><div class="list-item"><b>🌾 Cultivos y parcelas</b><span class="tag">Producción</span></div><div class="list-item"><b>📦 Bodegas e inventario</b><span class="tag">Existencias</span></div><div class="list-item"><b>🚚 Transporte y distribución</b><span class="tag">Logística</span></div><div class="list-item"><b>🌎 Operaciones de exportación</b><span class="tag">Comercio exterior</span></div></div></div>`;
+}
+function simulate(){let h=+$('#ha').value,y=+$('#yield').value,e=+$('#eff').value;$('#haVal').textContent=h;$('#yieldVal').textContent=y;$('#effVal').textContent=e+'%';$('#simResult').textContent=(h*y*e/100).toFixed(1)+' toneladas'}
+function reportes(){return `${pageHead('Reportes e indicadores','Información general para apoyar las decisiones')}<div class="grid stats">${stat('Valor de inventario',money(products.reduce((a,p)=>a+p.stock*p.cost,0)),'USD estimados','💰')}${stat('Productos',products.length,'Registrados','📦')}${stat('Contactos',clients.length,'En CRM','👥')}${stat('Movimientos',movements.length,'Historial acumulado','🔄')}</div><div class="card"><h2>Existencias por categoría</h2>${[...new Set(products.map(p=>p.category))].map(c=>{let n=products.filter(p=>p.category===c).reduce((a,p)=>a+p.stock,0);return `<div class="progress-row"><div class="progress-label"><span>${c}</span><b>${n} unidades</b></div><div class="progress"><i style="width:${Math.min(100,n/Math.max(1,products.reduce((a,p)=>a+p.stock,0))*100)}%"></i></div></div>`}).join('')}</div>`}
+function generic(title,desc,items){return `${pageHead(title,desc)}<div class="grid content-grid"><div class="card"><h2>Panel de ${title}</h2><p class="subtitle">Espacio de gestión integrado a CampoDirecto.</p><div class="list">${items.map(x=>`<div class="list-item"><b>${x}</b><span class="tag">Módulo</span></div>`).join('')}</div></div><div class="card"><h2>Información del sistema</h2><p class="subtitle">Esta sección forma parte de la estructura funcional del ERP. Puedes ampliar sus procesos, formularios y reportes según las necesidades de tu empresa.</p><span class="tag">Versión demostrativa</span></div></div>`}
+function configuracion(){return `${pageHead('Configuración','Datos generales de la plataforma')}<div class="card"><h2>CampoDirecto</h2><p class="subtitle">Sistema de gestión agrícola y comercio exterior · Ecuador</p><div class="list"><div class="list-item"><b>Nombre de la plataforma</b><span>CampoDirecto</span></div><div class="list-item"><b>Moneda de trabajo</b><span>USD · Dólar estadounidense</span></div><div class="list-item"><b>Almacenamiento</b><span>Local en este navegador</span></div><div class="list-item"><b>Versión</b><span>Prototipo 1.0</span></div></div><p class="subtitle">Los datos de esta versión se guardan en el navegador del dispositivo.</p></div>`}
+const compras=()=>generic('Compras','Planificación y registro de adquisiciones',['Solicitudes de compra','Órdenes de compra','Recepción de productos','Control de costos']);
+const ventas=()=>generic('Ventas','Gestión comercial de productos agrícolas',['Cotizaciones','Pedidos de clientes','Facturación (registro)','Seguimiento de ventas']);
+const proveedores=()=>generic('Proveedores','Gestión de aliados y abastecimiento',['Directorio de proveedores','Evaluación de proveedores','Historial de compras','Condiciones comerciales']);
+const logistica=()=>generic('Logística','Planificación de almacenamiento y distribución',['Despachos','Transporte','Rutas de distribución','Control de entregas']);
+const exportaciones=()=>generic('Exportaciones','Preparación y seguimiento de operaciones internacionales',['Mercados de destino','Incoterms 2020','Documentación de exportación','Costos y seguimiento']);
+const oportunidades=()=>generic('Oportunidades comerciales','Seguimiento de posibles negocios',['Prospectos','Negociaciones','Propuestas comerciales','Cierre de oportunidades']);
+const produccion=()=>generic('Producción y cultivos','Planificación de las actividades agrícolas',['Planificación de siembra','Seguimiento de cultivos','Cosechas','Control de rendimiento']);
+
+$('#navigation').addEventListener('click',e=>{let b=e.target.closest('[data-page]');if(b)showPage(b.dataset.page)});
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+$('#globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){showPage('inventario');$('#productSearch').value=e.target.value;filterProducts()}});
+showPage('dashboard');
+</script>
+</body>
+</html>
