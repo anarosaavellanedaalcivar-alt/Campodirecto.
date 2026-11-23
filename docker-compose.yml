@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16
+    container_name: campodirecto-db
+    restart: always
+    environment:
+      POSTGRES_USER: campodirecto
+      POSTGRES_PASSWORD: campodirecto
+      POSTGRES_DB: campodirecto
+    ports:
+      - "5432:5432"
+    volumes:
+      - campodirecto_data:/var/lib/postgresql/data
+volumes:
+  campodirecto_data:

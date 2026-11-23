@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  ADMINISTRADOR
+  GERENTE
+  PRODUCTOR
+  PROVEEDOR
+  EXPORTADOR
+  IMPORTADOR
+  VENDEDOR
+  CONTADOR
+  INVENTARIO
+  TRANSPORTISTA
+  CLIENTE
+}
+
+enum TipoMovimiento {
+  ENTRADA
+  SALIDA
+  AJUSTE
+  MERMA
+}
+
+model Usuario {
+  id String @id @default(cuid())
+  nombre String
+  email String @unique
+  password String
+  rol Rol @default(CLIENTE)
+  activo Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  productos Producto[]
+  pedidos Pedido[]
+  clientes Cliente[]
+}
+
+model Producto {
+  id String @id @default(cuid())
+  sku String @unique
+  nombre String
+  descripcion String
+  categoria String
+  subcategoria String?
+  unidadMedida String
+  precioCompra Float
+  precioVenta Float
+  stockActual Float @default(0)
+  stockMinimo Float @default(0)
+  stockMaximo Float @default(0)
+  calidad String?
+  temporadaCosecha String?
+  disponibleNacional Boolean @default(true)
+  disponibleExportacion Boolean @default(false)
+  imagenUrl String?
+  codigoQR String?
+  productorId String?
+  productor Usuario? @relation(fields: [productorId], references: [id])
+  lotes Lote[]
+  movimientos MovimientoInventario[]
+  detallesPedido DetallePedido[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lote {
+  id String @id @default(cuid())
+  codigoLote String @unique
+  productoId String
+  producto Producto @relation(fields: [productoId], references: [id])
+  cantidad Float
+  fechaCosecha DateTime?
+  fechaCaducidad DateTime?
+  almacen String
+  trazabilidadQR String?
+  createdAt DateTime @default(now())
+}
+
+model MovimientoInventario {
+  id String @id @default(cuid())
+  productoId String
+  producto Producto @relation(fields: [productoId], references: [id])
+  tipo TipoMovimiento
+  cantidad Float
+  motivo String
+  almacen String
+  usuarioId String?
+  createdAt DateTime @default(now())
+}
+
+model Cliente {
+  id String @id @default(cuid())
+  nombre String
+  tipoCliente String
+  pais String
+  ciudad String?
+  email String
+  telefono String?
+  contactoComercial String?
+  preferencias String?
+  clasificacion String?
+  usuarioId String?
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+  pedidos Pedido[]
+  oportunidades Oportunidad[]
+  createdAt DateTime @default(now())
+}
+
+model Proveedor {
+  id String @id @default(cuid())
+  nombre String
+  pais String
+  ciudad String?
+  email String
+  telefono String?
+  tipoProveedor String
+  calificacion Float @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Pedido {
+  id String @id @default(cuid())
+  codigo String @unique
+  clienteId String
+  cliente Cliente @relation(fields: [clienteId], references: [id])
+  usuarioId String?
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+  tipo String
+  estado String @default("PENDIENTE")
+  total Float @default(0)
+  moneda String @default("USD")
+  incoterm String?
+  paisDestino String?
+  createdAt DateTime @default(now())
+  detalles DetallePedido[]
+}
+
+model DetallePedido {
+  id String @id @default(cuid())
+  pedidoId String
+  pedido Pedido @relation(fields: [pedidoId], references: [id])
+  productoId String
+  producto Producto @relation(fields: [productoId], references: [id])
+  cantidad Float
+  precioUnitario Float
+  subtotal Float
+}
+
+model Oportunidad {
+  id String @id @default(cuid())
+  titulo String
+  clienteId String
+  cliente Cliente @relation(fields: [clienteId], references: [id])
+  producto String
+  cantidad Float
+  etapa String @default("PROSPECTO")
+  valorEstimado Float @default(0)
+  notas String?
+  createdAt DateTime @default(now())
+}
+
+model PrecioMercado {
+  id String @id @default(cuid())
+  producto String
+  mercado String
+  pais String
+  provincia String?
+  unidad String
+  precioMinimo Float
+  precioPromedio Float
+  precioMaximo Float
+  variacion Float?
+  fuente String
+  fechaActualizacion DateTime @default(now())
+  esDemostrativo Boolean @default(true)
+}
+
+model Embarque {
+  id String @id @default(cuid())
+  codigo String @unique
+  tipoOperacion String
+  producto String
+  cantidad Float
+  unidad String
+  paisOrigen String
+  paisDestino String
+  incoterm String
+  valorFOB Float
+  flete Float
+  seguro Float
+  valorCIF Float
+  estado String @default("PLANIFICADO")
+  createdAt DateTime @default(now())
+}
