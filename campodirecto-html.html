@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CampoDirecto AI — ERP + CRM + Gemelos Digitales Ecuador</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-canvas: #0b1610;
+      --bg-panel: rgba(18, 38, 27, 0.78);
+      --bg-card-glass: rgba(24, 52, 37, 0.65);
+      --border-glass: rgba(124, 196, 140, 0.18);
+      --accent-green: #38b058;
+      --accent-bright: #67d97b;
+      --accent-gold: #d5a642;
+      --text-primary: #f2f8f4;
+      --text-muted: #9ab5a5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+    }
+
+    .glass-subcard {
+      background: var(--bg-card-glass);
+      border: 1px solid rgba(134, 210, 150, 0.15);
+      border-radius: 14px;
+    }
+
+    .agri-map-bg {
+      background:
+        radial-gradient(circle at 22% 28%, rgba(76, 175, 80, 0.24), transparent 36%),
+        radial-gradient(circle at 74% 36%, rgba(213, 166, 66, 0.14), transparent 34%),
+        radial-gradient(circle at 52% 72%, rgba(56, 176, 88, 0.2), transparent 42%),
+        repeating-linear-gradient(
+          -18deg,
+          rgba(103, 217, 123, 0.045) 0px,
+          rgba(103, 217, 123, 0.045) 14px,
+          rgba(14, 32, 22, 0.35) 14px,
+          rgba(14, 32, 22, 0.35) 28px
+        ),
+        linear-gradient(155deg, #0e2418 0%, #163725 48%, #0c1b12 100%);
+    }
+
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(11, 22, 16, 0.4);
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(103, 217, 123, 0.28);
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    // =========================================================================
+    // DATOS DEMOSTRATIVOS / SIMULACIÓN — CAMPODIRECTO ECUADOR (ENFOQUE CARCHI)
+    // =========================================================================
+    const DEMO_BANNER_TEXT =
+      "Modo Simulación / Datos Demostrativos — Precios, métricas, gemelos digitales y cálculos aduaneros son referenciales.";
+
+    const ROLES_LIST = [
+      "Administrador general",
+      "Gerente",
+      "Productor",
+      "Proveedor",
+      "Exportador",
+      "Importador",
+      "Vendedor",
+      "Contador",
+      "Responsable de inventario",
+      "Transportista",
+      "Cliente",
+    ];
+
+    const DATE_RANGES = [
+      "Nov 20 – Nov 26, 2026",
+      "Nov 13 – Nov 19, 2026",
+      "Campaña Carchi Q4 2026",
+    ];
+
+    const INITIAL_FIELDS = [
+      {
+        id: "FLD-CAR-01",
+        name: "Finca San Francisco (Tulcán)",
+        province: "Carchi",
+        city: "Tulcán",
+        crop: "Papa Superchola",
+        category: "Tubérculos",
+        areaHa: 38.5,
+        healthScore: 92,
+        status: "Activo",
+        producer: "Consorcio Papero Norte del Carchi",
+        unit: "quintales",
+        stock: 460,
+        minStock: 120,
+        storageCap: 650,
+        priceUsd: 22.0,
+        quality: "Primera Seleccionada",
+        presentation: "Saco 45.36 kg",
+        lot: "LOT-CAR-2026-01",
+        harvestDate: "2026-11-18",
+        txHash: "0x91a4e8...c82e",
+        moisture: 64,
+        nitrogen: "Óptimo",
+        phosphorus: "Alto",
+        potassium: "Óptimo",
+        organicMatter: 3.4,
+        routeSummary: "Tulcán → Rumichaca / Quito (4.5h)",
+        x: 46,
+        y: 26,
+      },
+      {
+        id: "FLD-CAR-02",
+        name: "Hacienda El Ángel",
+        province: "Carchi",
+        city: "Espejo / El Ángel",
+        crop: "Trigo Andino",
+        category: "Cereales",
+        areaHa: 24.0,
+        healthScore: 87,
+        status: "Activo",
+        producer: "Finca Páramo Andino",
+        unit: "quintales",
+        stock: 210,
+        minStock: 60,
+        storageCap: 360,
+        priceUsd: 25.5,
+        quality: "Grado A Molinero",
+        presentation: "Saco 45.36 kg",
+        lot: "LOT-CAR-2026-04",
+        harvestDate: "2026-11-04",
+        txHash: "0x77c109...55a3",
+        moisture: 55,
+        nitrogen: "Medio",
+        phosphorus: "Alto",
+        potassium: "Medio",
+        organicMatter: 3.1,
+        routeSummary: "El Ángel → Ibarra / Quito (3.2h)",
+        x: 26,
+        y: 34,
+      },
+      {
+        id: "FLD-CAR-03",
+        name: "Parcela Valle de Mira",
+        province: "Carchi",
+        city: "Mira",
+        crop: "Fréjol Cargamanto",
+        category: "Legumbres",
+        areaHa: 19.5,
+        healthScore: 89,
+        status: "Activo",
+        producer: "Asoc. Valle de Mira",
+        unit: "quintales",
+        stock: 310,
+        minStock: 85,
+        storageCap: 450,
+        priceUsd: 70.0,
+        quality: "Grado A Exportación Andina",
+        presentation: "Saco 45.36 kg",
+        lot: "LOT-CAR-2026-09",
+        harvestDate: "2026-11-12",
+        txHash: "0x53a12f...66d9",
+        moisture: 52,
+        nitrogen: "Alto",
+        phosphorus: "Medio",
+        potassium: "Alto",
+        organicMatter: 2.9,
+        routeSummary: "Mira → Ipiales / Cali (6.0h)",
+        x: 68,
+        y: 38,
+      },
+      {
+        id: "FLD-IMB-04",
+        name: "Finca Pimampiro Hass",
+        province: "Imbabura",
+        city: "Pimampiro",
+        crop: "Aguacate Hass",
+        category: "Frutas",
+        areaHa: 28.0,
+        healthScore: 91,
+        status: "Activo",
+        producer: "AgroExport Pimampiro S.A.",
+        unit: "cajas",
+        stock: 820,
+        minStock: 200,
+        storageCap: 1100,
+        priceUsd: 12.0,
+        quality: "GlobalG.A.P. Calibre 18-20",
+        presentation: "Caja exportación 4 kg",
+        lot: "LOT-IMB-2026-19",
+        harvestDate: "2026-11-19",
+        txHash: "0x28e94b...64b5",
+        moisture: 58,
+        nitrogen: "Óptimo",
+        phosphorus: "Alto",
+        potassium: "Óptimo",
+        organicMatter: 3.0,
+        routeSummary: "Pimampiro → Guayaquil / Miami",
+        x: 56,
+        y: 58,
+      },
+      {
+        id: "FLD-PIC-05",
+        name: "Invernaderos Tabacundo",
+        province: "Pichincha",
+        city: "Tabacundo / Cayambe",
+        crop: "Rosas",
+        category: "Exportación",
+        areaHa: 15.6,
+        healthScore: 94,
+        status: "Activo",
+        producer: "Equinox Roses Ecuador",
+        unit: "cajas",
+        stock: 610,
+        minStock: 150,
+        storageCap: 850,
+        priceUsd: 69.0,
+        quality: "Tallos 60-80 cm Florverde",
+        presentation: "Caja exportación aérea HB",
+        lot: "LOT-PIC-2026-305",
+        harvestDate: "2026-11-22",
+        txHash: "0x54b2c1...90f6",
+        moisture: 62,
+        nitrogen: "Alto",
+        phosphorus: "Alto",
+        potassium: "Alto",
+        organicMatter: 3.2,
+        routeSummary: "Tabacundo → UIO Tababela → Ámsterdam/MIA",
+        x: 34,
+        y: 66,
+      },
+      {
+        id: "FLD-LRI-06",
+        name: "Hacienda Vinces Arriba",
+        province: "Los Ríos",
+        city: "Vinces",
+        crop: "Cacao Fino de Aroma",
+        category: "Exportación",
+        areaHa: 42.0,
+        healthScore: 84,
+        status: "Activo",
+        producer: "Cacaoteros Finos de Los Ríos",
+        unit: "toneladas",
+        stock: 54,
+        minStock: 15,
+        storageCap: 80,
+        priceUsd: 4550.0,
+        quality: "ASSPS Fermentación 84%",
+        presentation: "Saco yute 69 kg / Contenedor",
+        lot: "LOT-LRI-2026-42",
+        harvestDate: "2026-11-08",
+        txHash: "0x81f40e...72c0",
+        moisture: 68,
+        nitrogen: "Medio",
+        phosphorus: "Medio",
+        potassium: "Alto",
+        organicMatter: 2.8,
+        routeSummary: "Vinces → Puerto de Guayaquil → Róterdam",
+        x: 78,
+        y: 68,
+      },
+    ];
+
+    const ECUADOR_CATALOG_ITEMS = [
+      { name: "Papa Superchola", origin: "Tulcán / Montúfar, Carchi", unit: "quintales", price: 22.0, quality: "Primera Seleccionada", presentation: "Saco 45.36 kg", tag: "Carchi" },
+      { name: "Maíz Amarillo Duro", origin: "Bolívar, Carchi / Los Ríos", unit: "quintales", price: 19.0, quality: "Grado A Humedad 13%", presentation: "Saco 45.36 kg", tag: "Cereal" },
+      { name: "Trigo Andino", origin: "El Ángel / Espejo, Carchi", unit: "quintales", price: 25.5, quality: "Grado A Molinero", presentation: "Saco 45.36 kg", tag: "Carchi" },
+      { name: "Cebada", origin: "Guamote, Chimborazo / Carchi", unit: "quintales", price: 26.8, quality: "Perlada Grado A", presentation: "Saco 45.36 kg", tag: "Andino" },
+      { name: "Avena", origin: "Latacunga, Cotopaxi", unit: "quintales", price: 32.0, quality: "Integral Limpia", presentation: "Saco 45.36 kg", tag: "Cereal" },
+      { name: "Arveja", origin: "Huaca / San Gabriel, Carchi", unit: "quintales", price: 36.0, quality: "Tierna Seleccionada", presentation: "Saco 45.36 kg", tag: "Carchi" },
+      { name: "Fréjol Cargamanto", origin: "Mira, Carchi", unit: "quintales", price: 70.0, quality: "Grado A Exportación", presentation: "Saco 45.36 kg", tag: "Carchi" },
+      { name: "Haba", origin: "Salcedo, Cotopaxi / Tulcán", unit: "quintales", price: 30.0, quality: "Grado A Fresca/Seca", presentation: "Saco 45.36 kg", tag: "Legumbre" },
+      { name: "Cebolla Colorada", origin: "Mira, Carchi / Santa Elena", unit: "quintales", price: 22.5, quality: "Bulbo Firme Primera", presentation: "Saco malla 45.36 kg", tag: "Hortaliza" },
+      { name: "Tomate de Árbol", origin: "Patate, Tungurahua", unit: "cajas", price: 15.5, quality: "Calibre Exportación", presentation: "Caja 18 kg", tag: "Fruta" },
+      { name: "Aguacate Hass", origin: "Pimampiro, Imbabura", unit: "cajas", price: 12.0, quality: "GlobalG.A.P.", presentation: "Caja 4 kg", tag: "Exportación" },
+      { name: "Café", origin: "Intag, Imbabura / Loja", unit: "sacos", price: 315.0, quality: "Especialidad 86.5 pts", presentation: "Saco GrainPro 69 kg", tag: "Exportación" },
+      { name: "Cacao Fino de Aroma", origin: "Vinces, Los Ríos", unit: "toneladas", price: 4550.0, quality: "Arriba Superior ASSPS", presentation: "Contenedor / Saco 69 kg", tag: "Exportación" },
+      { name: "Banano Cavendish", origin: "Machala, El Oro", unit: "cajas", price: 10.2, quality: "22XU Exportación", presentation: "Caja 43 lbs (19.5 kg)", tag: "Exportación" },
+      { name: "Rosas", origin: "Cayambe / Tabacundo, Pichincha", unit: "cajas", price: 69.0, quality: "Tallos 60-80 cm", presentation: "Caja exportación aérea", tag: "Exportación" },
+      { name: "Quinua", origin: "Otavalo, Imbabura / Chimborazo", unit: "quintales", price: 129.0, quality: "Orgánica Desaponificada", presentation: "Saco 45.36 kg", tag: "Superalimento" },
+    ];
+
+    const INITIAL_CRM_DEALS = [
+      { id: "CRM-101", client: "Supermercados Andinos S.A.", country: "Ecuador (Quito / Tulcán)", segment: "Supermercado", stage: "Cerrado", value: 38400, product: "Papa Superchola + Arveja" },
+      { id: "CRM-102", client: "Comercializadora Frontera Sur", country: "Colombia (Ipiales / Cali)", segment: "Mayorista", stage: "Negociación", value: 52000, product: "Fréjol Cargamanto + Cebolla" },
+      { id: "CRM-103", client: "EuroChoc Gourmet B.V.", country: "Países Bajos (Róterdam)", segment: "Importador", stage: "Cotizado", value: 118500, product: "Cacao Fino de Aroma" },
+      { id: "CRM-104", client: "Pacific Fresh Produce", country: "Estados Unidos (Miami)", segment: "Importador", stage: "Prospecto", value: 74000, product: "Aguacate Hass + Rosas" },
+    ];
+
+    const INITIAL_TASKS = [
+      { id: "TSK-1", title: "Clasificación Papa Superchola", field: "Finca San Francisco (Tulcán)", date: "Hoy, 08:00 AM", status: "En curso" },
+      { id: "TSK-2", title: "Control Humedad y Fertilización", field: "Hacienda El Ángel (Carchi)", date: "Mañana, 07:30 AM", status: "Programada" },
+      { id: "TSK-3", title: "Despacho Frontera Rumichaca / Puerto", field: "Parcela Valle de Mira", date: "25 Nov, 06:00 AM", status: "Logística" },
+    ];
+
+    const MOISTURE_SERIES = [
+      { day: "Nov 14", actual: 74, forecast: 72 },
+      { day: "Nov 16", actual: 66, forecast: 65 },
+      { day: "Nov 18", actual: 58, forecast: 60 },
+      { day: "Nov 20", actual: 52, forecast: 56 },
+      { day: "Nov 23", actual: 64, forecast: 63 },
+      { day: "Nov 26", actual: 64, forecast: 68 },
+    ];
+
+    const WEATHER_FORECAST = [
+      { day: "Dom", icon: "☀️", high: "16°", low: "7°" },
+      { day: "Lun", icon: "⛅", high: "15°", low: "6°", active: true },
+      { day: "Mar", icon: "🌤️", high: "17°", low: "7°" },
+      { day: "Mié", icon: "🌦️", high: "14°", low: "6°" },
+      { day: "Jue", icon: "⛅", high: "16°", low: "7°" },
+    ];
+
+    const EXPORT_SCENARIOS = [
+      { id: "exp-col", label: "Corredor Andino (Tulcán → Rumichaca / Colombia)", multiplier: 1.08, transitDays: 2 },
+      { id: "exp-ue", label: "Unión Europea (Guayaquil → Róterdam)", multiplier: 1.24, transitDays: 22 },
+      { id: "exp-usa", label: "EE.UU. Aéreo / Marítimo (UIO / GYE → Miami)", multiplier: 1.19, transitDays: 6 },
+    ];
+
+    function App() {
+      const [activeNav, setActiveNav] = useState("dashboard");
+      const [role, setRole] = useState("Administrador general");
+      const [dateRange, setDateRange] = useState(DATE_RANGES[0]);
+      const [fields, setFields] = useState(INITIAL_FIELDS);
+      const [selectedFieldId, setSelectedFieldId] = useState(INITIAL_FIELDS[0].id);
+      const [crmDeals, setCrmDeals] = useState(INITIAL_CRM_DEALS);
+      const [tasks, setTasks] = useState(INITIAL_TASKS);
+      const [searchQuery, setSearchQuery] = useState("");
+      const [toastMsg, setToastMsg] = useState(null);
+      const [qrModalField, setQrModalField] = useState(null);
+      const [showAllTasksModal, setShowAllTasksModal] = useState(false);
+
+      // Estado de Gemelos Digitales (Digital Twins)
+      const [twinProductionPct, setTwinProductionPct] = useState(106);
+      const [twinDemandPct, setTwinDemandPct] = useState(112);
+      const [twinTransportPct, setTwinTransportPct] = useState(96);
+      const [twinExportScenarioId, setTwinExportScenarioId] = useState(EXPORT_SCENARIOS[0].id);
+
+      // Formulario nuevo lote / producto ERP
+      const [newFieldName, setNewFieldName] = useState("");
+      const [newFieldProvince, setNewFieldProvince] = useState("Carchi");
+      const [newFieldCrop, setNewFieldCrop] = useState("Papa Superchola");
+      const [newFieldArea, setNewFieldArea] = useState(12.5);
+      const [newFieldStock, setNewFieldStock] = useState(220);
+      const [newFieldPrice, setNewFieldPrice] = useState(22.0);
+
+      // Formulario nueva oportunidad CRM
+      const [newDealClient, setNewDealClient] = useState("");
+      const [newDealCountry, setNewDealCountry] = useState("Colombia");
+      const [newDealSegment, setNewDealSegment] = useState("Importador");
+      const [newDealValue, setNewDealValue] = useState(35000);
+      const [newDealProduct, setNewDealProduct] = useState("Papa Superchola");
+
+      // Calculadora de Comercio Exterior (Estimación configurable)
+      const [fobUsd, setFobUsd] = useState(28000);
+      const [freightUsd, setFreightUsd] = useState(2150);
+      const [insuranceUsd, setInsuranceUsd] = useState(310);
+      const [portUsd, setPortUsd] = useState(420);
+      const [customsUsd, setCustomsUsd] = useState(360);
+      const [taxPct, setTaxPct] = useState(10);
+      const [incoterm, setIncoterm] = useState("CIF");
+
+      // Asistente CampoDirecto IA
+      const [aiInput, setAiInput] = useState("");
+      const [aiChat, setAiChat] = useState([
+        {
+          role: "ai",
+          text: "¡Hola! Soy CampoDirecto AI ('Del productor al mundo, sin fronteras'). Pregúntame sobre el gemelo digital en Tulcán/Carchi, score de lotes, estimaciones FOB/CIF o mercados de exportación.",
+        },
+      ]);
+
+      const triggerToast = (msg) => {
+        setToastMsg(msg);
+        setTimeout(() => setToastMsg(null), 3200);
+      };
+
+      const selectedField = useMemo(
+        () => fields.find((f) => f.id === selectedFieldId) || fields[0],
+        [fields, selectedFieldId]
+      );
+
+      const selectedExportScenario = useMemo(
+        () => EXPORT_SCENARIOS.find((s) => s.id === twinExportScenarioId) || EXPORT_SCENARIOS[0],
+        [twinExportScenarioId]
+      );
+
+      // Cálculos del Gemelo Digital conectado al lote seleccionado
+      const twinSimulation = useMemo(() => {
+        const projectedProduction = Math.round(selectedField.stock * (twinProductionPct / 100));
+        const projectedDemand = Math.round(
+          selectedField.stock * (twinDemandPct / 100) * selectedExportScenario.multiplier
+        );
+        const storageUtilizationPct = Math.min(
+          100,
+          Math.round((projectedProduction / Math.max(1, selectedField.storageCap)) * 100)
+        );
+        const storageOverflow = Math.max(0, projectedProduction - selectedField.storageCap);
+        const adjustedRouteCostUsd = Number(
+          (480 * (twinTransportPct / 100) * (selectedExportScenario.transitDays > 5 ? 2.4 : 1)).toFixed(2)
+        );
+        const simulatedRevenueUsd = Number(
+          (Math.min(projectedProduction, projectedDemand) * selectedField.priceUsd).toFixed(2)
+        );
+        const twinHealthIndex = Math.min(
+          100,
+          Math.max(
+            35,
+            Math.round(
+              selectedField.healthScore * 0.55 +
+                (twinProductionPct * 0.25) +
+                ((120 - twinTransportPct) * 0.2)
+            )
+          )
+        );
+
+        return {
+          projectedProduction,
+          projectedDemand,
+          storageUtilizationPct,
+          storageOverflow,
+          adjustedRouteCostUsd,
+          simulatedRevenueUsd,
+          twinHealthIndex,
+        };
+      }, [
+        selectedField,
+        twinProductionPct,
+        twinDemandPct,
+        twinTransportPct,
+        selectedExportScenario,
+      ]);
+
+      const totalAreaHa = useMemo(
+        () => Number(fields.reduce((acc, f) => acc + Number(f.areaHa || 0), 0).toFixed(1)),
+        [fields]
+      );
+
+      const avgHealthScore = useMemo(() => {
+        if (!fields.length) return 0;
+        return Math.round(fields.reduce((acc, f) => acc + f.healthScore, 0) / fields.length);
+      }, [fields]);
+
+      const activeFieldsCount = useMemo(
+        () => fields.filter((f) => f.status === "Activo").length,
+        [fields]
+      );
+
+      const filteredFields = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
+        if (!q) return fields;
+        return fields.filter(
+          (f) =>
+            f.name.toLowerCase().includes(q) ||
+            f.crop.toLowerCase().includes(q) ||
+            f.province.toLowerCase().includes(q) ||
+            f.city.toLowerCase().includes(q)
+        );
+      }, [fields, searchQuery]);
+
+      const cropDistribution = useMemo(() => {
+        const grouped = {};
+        fields.forEach((f) => {
+          grouped[f.crop] = (grouped[f.crop] || 0) + Number(f.areaHa || 0);
+        });
+        const colors = ["#38b058", "#d5a642", "#67d97b", "#2d8a68", "#8bc34a", "#e0b85c"];
+        return Object.entries(grouped).map(([crop, ha], idx) => ({
+          crop,
+          ha: Number(ha.toFixed(1)),
+          pct: totalAreaHa > 0 ? Math.round((ha / totalAreaHa) * 100) : 0,
+          color: colors[idx % colors.length],
+        }));
+      }, [fields, totalAreaHa]);
+
+      const cifUsd = Number(fobUsd) + Number(freightUsd) + Number(insuranceUsd);
+      const estimatedTaxesUsd = Number(((cifUsd * Number(taxPct)) / 100).toFixed(2));
+      const totalLandedUsd = Number(
+        (cifUsd + Number(portUsd) + Number(customsUsd) + estimatedTaxesUsd).toFixed(2)
+      );
+
+      const applyTwinToInventory = () => {
+        setFields((prev) =>
+          prev.map((f) =>
+            f.id === selectedField.id
+              ? { ...f, stock: twinSimulation.projectedProduction, healthScore: twinSimulation.twinHealthIndex }
+              : f
+          )
+        );
+        triggerToast(
+          `Simulación del Gemelo Digital aplicada a ${selectedField.name}: ${twinSimulation.projectedProduction} ${selectedField.unit}.`
+        );
+      };
+
+      const handleAddField = (e) => {
+        e.preventDefault();
+        if (!newFieldName.trim()) return;
+        const stockVal = Number(newFieldStock) || 100;
+        const created = {
+          id: `FLD-${Date.now().toString().slice(-4)}`,
+          name: newFieldName.trim(),
+          province: newFieldProvince,
+          city: newFieldProvince === "Carchi" ? "Tulcán" : newFieldProvince,
+          crop: newFieldCrop,
+          category: "Agrícola",
+          areaHa: Number(newFieldArea) || 10,
+          healthScore: 88,
+          status: "Activo",
+          producer: `Productor (${role})`,
+          unit: "quintales",
+          stock: stockVal,
+          minStock: 40,
+          storageCap: Math.round(stockVal * 1.45),
+          priceUsd: Number(newFieldPrice) || 20,
+          quality: "Calidad Seleccionada",
+          presentation: "Saco / Caja Comercial",
+          lot: `LOT-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 899)}`,
+          harvestDate: "2026-11-23",
+          txHash: `0x${Math.random().toString(16).slice(2, 8)}...demo`,
+          moisture: 61,
+          nitrogen: "Óptimo",
+          phosphorus: "Medio",
+          potassium: "Óptimo",
+          organicMatter: 3.0,
+          routeSummary: `${newFieldProvince} → Centro Logístico Nacional`,
+          x: 20 + ((fields.length * 13) % 62),
+          y: 24 + ((fields.length * 17) % 52),
+        };
+        setFields([created, ...fields]);
+        setSelectedFieldId(created.id);
+        setNewFieldName("");
+        triggerToast(`Lote "${created.name}" registrado en ERP y mapa.`);
+      };
+
+      const handleAddDeal = (e) => {
+        e.preventDefault();
+        if (!newDealClient.trim()) return;
+        const deal = {
+          id: `CRM-${Date.now().toString().slice(-3)}`,
+          client: newDealClient.trim(),
+          country: newDealCountry,
+          segment: newDealSegment,
+          stage: "Prospecto",
+          value: Number(newDealValue) || 15000,
+          product: newDealProduct,
+        };
+        setCrmDeals([deal, ...crmDeals]);
+        setNewDealClient("");
+        triggerToast(`Oportunidad CRM creada para ${deal.client}.`);
+      };
+
+      const cycleDealStage = (id) => {
+        const stages = ["Prospecto", "Cotizado", "Negociación", "Cerrado"];
+        setCrmDeals((prev) =>
+          prev.map((d) => {
+            if (d.id !== id) return d;
+            const next = stages[(stages.indexOf(d.stage) + 1) % stages.length];
+            return { ...d, stage: next };
+          })
+        );
+        triggerToast("Etapa CRM actualizada.");
+      };
+
+      const handleSendAi = (promptOverride = null) => {
+        const text = (promptOverride !== null ? promptOverride : aiInput).trim();
+        if (!text) return;
+        const ql = text.toLowerCase();
+        let reply =
+          "En los datos demostrativos actuales, Carchi/Tulcán lidera la oferta de Papa Superchola, Arveja y Fréjol Cargamanto, mientras Pichincha, Imbabura y Los Ríos impulsan Rosas, Aguacate Hass y Cacao Fino.";
+        if (ql.includes("gemelo") || ql.includes("simula") || ql.includes("twin")) {
+          reply = `Gemelo Digital (${selectedField.name}): producción proyectada ${twinSimulation.projectedProduction} ${selectedField.unit}, ocupación de bodega ${twinSimulation.storageUtilizationPct}% y escenario ${selectedExportScenario.label} con ingreso simulado de $${twinSimulation.simulatedRevenueUsd.toLocaleString()} (dato demo).`;
+        } else if (ql.includes("papa") || ql.includes("tulcán") || ql.includes("carchi")) {
+          reply = `Lote en foco (${selectedField.name}): cultivo ${selectedField.crop}, score ${selectedField.healthScore}/100, stock ${selectedField.stock} ${selectedField.unit} y precio referencial $${selectedField.priceUsd.toFixed(2)} (dato demo).`;
+        } else if (ql.includes("cif") || ql.includes("fob") || ql.includes("export")) {
+          reply = `Calculadora (${incoterm}): FOB $${Number(fobUsd).toLocaleString()} -> CIF $${cifUsd.toLocaleString()} -> Costo total estimado $${totalLandedUsd.toLocaleString()} (estimación referencial, no liquidación oficial).`;
+        }
+        setAiChat((prev) => [...prev, { role: "user", text }, { role: "ai", text: reply }]);
+        if (promptOverride === null) setAiInput("");
+      };
+
+      const navItems = [
+        { id: "dashboard", label: "Dashboard", icon: "⊞" },
+        { id: "twins", label: "Digital Twins", icon: "🧬" },
+        { id: "crops", label: "Crop Management", icon: "🌾" },
+        { id: "fields", label: "Field Monitoring", icon: "🗺️" },
+        { id: "soil", label: "Soil Health", icon: "🧪" },
+        { id: "weather", label: "Weather", icon: "⛅" },
+        { id: "crm", label: "CRM & Buyers", icon: "🤝" },
+        { id: "comex", label: "Trade & CIF Calc", icon: "🚢" },
+        { id: "catalog", label: "Ecuador Catalog", icon: "📦" },
+        { id: "trace", label: "QR & AI Assistant", icon: "⛓️" },
+        { id: "roles", label: "Roles & Security", icon: "🛡️" },
+      ];
+
+      const ringRadius = 46;
+      const ringCircumference = 2 * Math.PI * ringRadius;
+      const ringDashOffset = ringCircumference - (avgHealthScore / 100) * ringCircumference;
+
+      return (
+        <div className="min-h-screen flex flex-col lg:flex-row bg-[#0b1610] text-[#f2f8f4]">
+          {toastMsg && (
+            <div className="fixed bottom-5 right-5 z-50 bg-[#153524] border border-[#67d97b]/40 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
+              {toastMsg}
+            </div>
+          )}
+
+          {/* BARRA LATERAL IZQUIERDA + ASISTENTE IA INTEGRADO ABAJO */}
+          <aside className="w-full lg:w-64 shrink-0 bg-[#0d1c14] border-b lg:border-b-0 lg:border-r border-[#67d97b]/15 p-4 flex flex-col justify-between gap-4">
+            <div>
+              <div className="flex items-center justify-between lg:justify-start gap-3 px-2 py-1 mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#38b058]/20 border border-[#67d97b]/40 flex items-center justify-center text-[#67d97b] font-extrabold text-lg">
+                    ❖
+                  </div>
+                  <div>
+                    <span className="font-extrabold text-base tracking-tight text-white">
+                      CampoDirecto <span className="text-[#d5a642]">AI</span>
+                    </span>
+                    <span className="block text-[10px] text-[#9ab5a5]">ERP + CRM + Twins • EC</span>
+                  </div>
+                </div>
+              </div>
+
+              <nav className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-1 gap-1.5">
+                {navItems.map((item) => {
+                  const isActive = activeNav === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveNav(item.id)}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition text-left ${
+                        isActive
+                          ? "bg-[#224732] text-white border border-[#67d97b]/35 shadow-sm"
+                          : "text-[#9ab5a5] hover:bg-[#152c1f] hover:text-white"
+                      }`}
+                    >
+                      <span className="text-sm">{item.icon}</span>
+                      <span className="truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+
+            <div className="glass-subcard p-3.5 space-y-2.5">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-[#38b058]/25 text-[#67d97b] flex items-center justify-center text-sm font-bold">
+                  ✦
+                </span>
+                <div>
+                  <p className="text-xs font-bold text-white">AI Assistant</p>
+                  <p className="text-[10px] text-[#9ab5a5] leading-tight">
+                    Gemelos digitales, Carchi y CIF.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setActiveNav("trace");
+                  handleSendAi("Resumen del gemelo digital y exportación Carchi");
+                }}
+                className="w-full py-2 px-3 rounded-lg bg-[#1d3f2b] hover:bg-[#27553a] border border-[#67d97b]/25 text-xs font-bold text-white flex items-center justify-between transition"
+              >
+                <span>Ask AI Assistant</span>
+                <span className="text-[#d5a642]">›</span>
+              </button>
+            </div>
+          </aside>
+
+          {/* CONTENEDOR PRINCIPAL DERECHO */}
+          <div className="flex-1 flex flex-col min-w-0">
+            <header className="px-4 sm:px-6 py-3 border-b border-[#67d97b]/15 bg-[#0e1e15]/90 flex flex-wrap items-center justify-between gap-3">
+              <div className="relative flex-1 min-w-[210px] max-w-md">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar fincas, cultivos (Papa, Cacao, Rosas), Carchi..."
+                  className="w-full bg-[#152b1f] border border-[#67d97b]/20 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-[#7c9988] focus:outline-none focus:border-[#67d97b]"
+                />
+                <span className="absolute left-3 top-2 text-xs text-[#7c9988]">🔍</span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="hidden xl:inline-block px-2.5 py-1 rounded-lg bg-[#d5a642]/15 border border-[#d5a642]/35 text-[#f0cb75] font-semibold">
+                  {DEMO_BANNER_TEXT}
+                </span>
+                <select
+                  value={role}
+                  onChange={(e) => {
+                    setRole(e.target.value);
+                    triggerToast(`Rol activo: ${e.target.value}`);
+                  }}
+                  aria-label="Seleccionar rol de usuario"
+                  className="px-2.5 py-1.5 rounded-xl bg-[#162d20] border border-[#67d97b]/25 font-semibold text-emerald-100 focus:outline-none"
+                >
+                  {ROLES_LIST.map((r) => (
+                    <option key={r} value={r} className="bg-[#0e2016] text-white">
+                      {r}
+                    </option>
+                  ))}
+                </select>
+                <div className="px-3 py-1.5 rounded-xl bg-[#162d20] border border-[#67d97b]/20 font-semibold text-emerald-100">
+                  Tulcán, Carchi • EC
+                </div>
+              </div>
+            </header>
+
+            <main className="flex-1 p-4 sm:p-6 space-y-6 custom-scroll">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+                    Bienvenido a CampoDirecto AI <span className="inline-block">👋</span>
+                  </h1>
+                  <p className="text-xs text-[#9ab5a5] mt-0.5">
+                    Del productor al mundo, sin fronteras — ERP, CRM, Gemelos Digitales y Comercio Exterior (datos demostrativos).
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setActiveNav("twins")}
+                    className="px-3.5 py-2 rounded-xl bg-[#38b058]/20 hover:bg-[#38b058]/30 border border-[#67d97b]/40 text-xs font-bold text-[#67d97b] transition"
+                  >
+                    🧬 Gemelo Digital
+                  </button>
+                  <select
+                    value={dateRange}
+                    onChange={(e) => setDateRange(e.target.value)}
+                    aria-label="Rango de fechas"
+                    className="px-3.5 py-2 rounded-xl glass-subcard text-xs font-semibold text-[#d5a642] focus:outline-none cursor-pointer"
+                  >
+                    {DATE_RANGES.map((dr) => (
+                      <option key={dr} value={dr} className="bg-[#0e2016] text-white">
+                        {dr}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* ===============================================================
+                  VISTA PRINCIPAL: DASHBOARD + TIRA DE GEMELO DIGITAL CONECTADO
+              =============================================================== */}
+              {activeNav === "dashboard" && (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                    <div className="glass-panel p-4 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs text-[#9ab5a5]">
+                        <span>Total Lotes / Fincas</span>
+                        <span>🌱</span>
+                      </div>
+                      <p className="text-2xl font-extrabold text-white">{fields.length}</p>
+                      <p className="text-[11px] text-[#67d97b] font-semibold">
+                        • {activeFieldsCount} Activos • Carchi prioritario
+                      </p>
+                    </div>
+
+                    <div className="glass-panel p-4 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs text-[#9ab5a5]">
+                        <span>Área Total</span>
+                        <span>📐</span>
+                      </div>
+                      <p className="text-2xl font-extrabold text-white">{totalAreaHa} ha</p>
+                      <p className="text-[11px] text-[#67d97b] font-semibold">
+                        ↗ +8.4 ha este mes (simulación)
+                      </p>
+                    </div>
+
+                    <div className="glass-panel p-4 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs text-[#9ab5a5]">
+                        <span>Cultivos Activos</span>
+                        <span>🌾</span>
+                      </div>
+                      <p className="text-2xl font-extrabold text-white">{cropDistribution.length}</p>
+                      <p className="text-[11px] text-[#9ab5a5] truncate">
+                        {cropDistribution.map((c) => c.crop).join(", ")}
+                      </p>
+                    </div>
+
+                    <div className="glass-panel p-4 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs text-[#9ab5a5]">
+                        <span>AI Health Score</span>
+                        <span>✦</span>
+                      </div>
+                      <p className="text-2xl font-extrabold text-white">
+                        {avgHealthScore} <span className="text-sm font-normal text-[#9ab5a5]">/100</span>
+                      </p>
+                      <p className="text-[11px] text-[#67d97b] font-semibold">Óptimo / Monitoreado</p>
+                    </div>
+                  </div>
+
+                  {/* SECCIÓN CENTRAL: HEALTH RING + MAPA INTERACTIVO + CLIMA Y SUELO */}
+                  <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+                    <div className="xl:col-span-3 glass-panel p-5 flex flex-col justify-between gap-4">
+                      <div>
+                        <h2 className="text-sm font-bold text-white">Field Health Overview</h2>
+                        <p className="text-[11px] text-[#9ab5a5]">
+                          Análisis IA de vegetación y estado de lotes
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-center gap-4 my-2">
+                        <div className="relative w-28 h-28 flex items-center justify-center">
+                          <svg viewBox="0 0 110 110" className="w-28 h-28 -rotate-90">
+                            <circle
+                              cx="55"
+                              cy="55"
+                              r={ringRadius}
+                              fill="none"
+                              stroke="rgba(154,181,165,0.18)"
+                              strokeWidth="9"
+                            />
+                            <circle
+                              cx="55"
+                              cy="55"
+                              r={ringRadius}
+                              fill="none"
+                              stroke="#67d97b"
+                              strokeWidth="9"
+                              strokeDasharray={ringCircumference}
+                              strokeDashoffset={ringDashOffset}
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="text-xl font-extrabold text-white">{avgHealthScore}</span>
+                            <span className="text-[10px] text-[#9ab5a5]">Score</span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 text-[11px]">
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-[#67d97b]">● Excelente</span>
+                            <span className="font-bold">40%</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-emerald-300">● Bueno</span>
+                            <span className="font-bold">35%</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-[#d5a642]">● Regular</span>
+                            <span className="font-bold">15%</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-rose-400">● Alerta</span>
+                            <span className="font-bold">10%</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-[#67d97b]/15 text-[11px] text-[#67d97b] font-semibold">
+                        ↗ +12% mejora vs semana anterior (demo)
+                      </div>
+                    </div>
+
+                    <div className="xl:col-span-6 glass-panel agri-map-bg p-4 relative min-h-[320px] flex flex-col justify-between overflow-hidden">
+                      <div className="flex flex-wrap items-center justify-between gap-2 z-10">
+                        <span className="px-2.5 py-1 rounded-lg bg-[#0d1e15]/85 border border-[#67d97b]/25 text-[11px] font-semibold text-emerald-100">
+                          Mapa de Fincas y Zonas • Haz clic en un marcador
+                        </span>
+                        <span className="px-2.5 py-1 rounded-lg bg-[#d5a642]/20 border border-[#d5a642]/40 text-[11px] font-bold text-[#f4cf7c]">
+                          {selectedField.province}
+                        </span>
+                      </div>
+
+                      <div className="relative flex-1 my-2">
+                        {filteredFields.map((fld) => {
+                          const isSelected = fld.id === selectedField.id;
+                          return (
+                            <button
+                              key={fld.id}
+                              onClick={() => setSelectedFieldId(fld.id)}
+                              style={{ left: `${fld.x}%`, top: `${fld.y}%` }}
+                              title={`${fld.name} - ${fld.crop}`}
+                              className={`-translate-x-1/2 -translate-y-1/2 absolute w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition transform hover:scale-110 ${
+                                isSelected
+                                  ? "bg-[#67d97b] text-[#0a1810] ring-4 ring-[#67d97b]/35 scale-110 z-20"
+                                  : "bg-[#143020] text-[#67d97b] border border-[#67d97b]/50 z-10"
+                              }`}
+                            >
+                              📍
+                            </button>
+                          );
+                        })}
+
+                        <div className="absolute right-1 bottom-1 w-64 sm:w-72 bg-[#0e2117]/95 border border-[#67d97b]/35 rounded-2xl p-3.5 shadow-2xl z-20 space-y-1.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs font-extrabold text-white truncate">
+                              {selectedField.name}
+                            </span>
+                            <button
+                              onClick={() => setQrModalField(selectedField)}
+                              className="text-[#67d97b] hover:underline text-[11px] font-bold shrink-0"
+                            >
+                              QR ›
+                            </button>
+                          </div>
+                          <p className="text-[11px] text-[#9ab5a5]">
+                            Cultivo: <strong className="text-white">{selectedField.crop}</strong> ({selectedField.areaHa} ha)
+                          </p>
+                          <p className="text-[11px] text-[#9ab5a5]">
+                            Origen: <strong className="text-emerald-200">{selectedField.city}, {selectedField.province}</strong>
+                          </p>
+                          <div className="flex items-center justify-between pt-1 text-[11px]">
+                            <span className="text-[#67d97b] font-bold">
+                              Health Score: {selectedField.healthScore}
+                            </span>
+                            <span className="text-[#d5a642] font-bold">
+                              ${selectedField.priceUsd.toFixed(2)} / {selectedField.unit}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="xl:col-span-3 space-y-4">
+                      <div className="glass-panel p-4 space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h2 className="text-sm font-bold text-white">Weather Today</h2>
+                            <p className="text-[11px] text-[#9ab5a5]">
+                              {selectedField.city}, {selectedField.province} (Demo)
+                            </p>
+                          </div>
+                          <span className="text-2xl">⛅</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl font-extrabold text-white">15°C</span>
+                          <span className="text-xs text-[#9ab5a5]">Parcialmente nublado</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-center pt-1 text-[10px]">
+                          <div className="glass-subcard p-2">
+                            <span className="text-[#9ab5a5] block">Humedad</span>
+                            <strong className="text-white">{selectedField.moisture}%</strong>
+                          </div>
+                          <div className="glass-subcard p-2">
+                            <span className="text-[#9ab5a5] block">Viento</span>
+                            <strong className="text-white">11 km/h</strong>
+                          </div>
+                          <div className="glass-subcard p-2">
+                            <span className="text-[#9ab5a5] block">Lluvia</span>
+                            <strong className="text-white">20%</strong>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-5 gap-1 pt-1 text-center text-[10px]">
+                          {WEATHER_FORECAST.map((w) => (
+                            <div
+                              key={w.day}
+                              className={`p-1.5 rounded-lg ${
+                                w.active
+                                  ? "bg-[#38b058]/25 border border-[#67d97b]/40 text-white"
+                                  : "text-[#9ab5a5]"
+                              }`}
+                            >
+                              <span className="block font-semibold">{w.day}</span>
+                              <span className="block my-0.5 text-xs">{w.icon}</span>
+                              <span className="text-white font-bold">{w.high}</span>
+                              <span className="block text-[9px]">{w.low}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="glass-panel p-4 space-y-3">
+                        <div>
+                          <h2 className="text-sm font-bold text-white">Soil Health Summary</h2>
+                          <p className="text-[11px] text-[#9ab5a5]">Promedio del lote seleccionado</p>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
+                          <div className="glass-subcard p-2">
+                            <span className="font-extrabold text-[#67d97b] block">N</span>
+                            <span className="text-white">{selectedField.nitrogen}</span>
+                          </div>
+                          <div className="glass-subcard p-2">
+                            <span className="font-extrabold text-[#d5a642] block">P</span>
+                            <span className="text-white">{selectedField.phosphorus}</span>
+                          </div>
+                          <div className="glass-subcard p-2">
+                            <span className="font-extrabold text-emerald-300 block">K</span>
+                            <span className="text-white">{selectedField.potassium}</span>
+                          </div>
+                        </div>
+                        <div className="space-y-1 text-xs">
+                          <div className="flex justify-between">
+                            <span className="text-[#9ab5a5]">Soil Organic Matter</span>
+                            <span className="font-bold text-[#67d97b]">{selectedField.organicMatter}%</span>
+                          </div>
+                          <div className="w-full h-2 rounded-full bg-[#0b1610] overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-[#38b058] to-[#d5a642]"
+                              style={{ width: `${Math.min(100, selectedField.organicMatter * 25)}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECCIÓN INFERIOR: UPCOMING TASKS + SOIL MOISTURE TREND + CROP DISTRIBUTION */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                    <div className="lg:col-span-4 glass-panel p-5 flex flex-col justify-between gap-3">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h2 className="text-sm font-bold text-white">Upcoming Tasks</h2>
+                          <span className="text-[11px] text-[#67d97b] font-semibold">ERP Operativo</span>
+                        </div>
+                        <div className="space-y-2.5">
+                          {tasks.map((t) => (
+                            <div key={t.id} className="glass-subcard p-3 flex items-center justify-between gap-2 text-xs">
+                              <div className="min-w-0">
+                                <p className="font-bold text-white truncate">{t.title}</p>
+                                <p className="text-[11px] text-[#9ab5a5] truncate">
+                                  {t.field} • {t.date}
+                                </p>
+                              </div>
+                              <span className="px-2 py-0.5 rounded-md bg-[#38b058]/20 text-[#67d97b] text-[10px] font-bold shrink-0">
+                                {t.status}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowAllTasksModal(true)}
+                        className="w-full py-2 px-3 rounded-xl bg-[#162d20] hover:bg-[#1e3d2b] border border-[#67d97b]/20 text-xs font-bold text-emerald-100 transition"
+                      >
+                        View All Tasks
+                      </button>
+                    </div>
+
+                    <div className="lg:col-span-4 glass-panel p-5 space-y-3 relative">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-sm font-bold text-white">Soil Moisture Trend</h2>
+                        <span className="px-2 py-0.5 rounded-md bg-[#1a3626] border border-[#67d97b]/30 text-[11px] font-bold text-[#67d97b]">
+                          {selectedField.moisture}% Actual
+                        </span>
+                      </div>
+                      <svg viewBox="0 0 320 140" className="w-full h-36">
+                        {[25, 50, 75, 100].map((val) => {
+                          const y = 115 - (val / 100) * 95;
+                          return (
+                            <g key={val}>
+                              <line x1="28" y1={y} x2="305" y2={y} stroke="rgba(154,181,165,0.14)" strokeDasharray="3 3" />
+                              <text x="4" y={y + 3} fontSize="9" fill="#9ab5a5">{val}</text>
+                            </g>
+                          );
+                        })}
+                        <polyline
+                          fill="none"
+                          stroke="#67d97b"
+                          strokeWidth="2.5"
+                          points={MOISTURE_SERIES.map((d, i) => `${32 + i * 52},${115 - (d.actual / 100) * 95}`).join(" ")}
+                        />
+                        <polyline
+                          fill="none"
+                          stroke="#d5a642"
+                          strokeWidth="2"
+                          strokeDasharray="4 4"
+                          points={MOISTURE_SERIES.map((d, i) => `${32 + i * 52},${115 - (d.forecast / 100) * 95}`).join(" ")}
+                        />
+                        {MOISTURE_SERIES.map((d, i) => (
+                          <text key={d.day} x={22 + i * 52} y="133" fontSize="9" fill="#9ab5a5">
+                            {d.day.replace("Nov ", "")}
+                          </text>
+                        ))}
+                      </svg>
+                    </div>
+
+                    <div className="lg:col-span-4 glass-panel p-5 flex flex-col justify-between gap-3">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h2 className="text-sm font-bold text-white">Crop Distribution</h2>
+                          <span className="text-xs font-bold text-[#67d97b]">{totalAreaHa} ha total</span>
+                        </div>
+                        <div className="space-y-2.5 text-xs">
+                          {cropDistribution.map((c) => (
+                            <div key={c.crop} className="space-y-1">
+                              <div className="flex justify-between">
+                                <span className="font-semibold text-white">{c.crop}</span>
+                                <span className="text-[#9ab5a5]">
+                                  {c.ha} ha ({c.pct}%)
+                                </span>
+                              </div>
+                              <div className="w-full h-2 rounded-full bg-[#0b1610] overflow-hidden">
+                                <div
+                                  className="h-full rounded-full"
+                                  style={{ width: `${Math.max(8, c.pct)}%`, backgroundColor: c.color }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setActiveNav("catalog")}
+                        className="w-full py-2 px-3 rounded-xl bg-[#162d20] hover:bg-[#1e3d2b] border border-[#67d97b]/20 text-xs font-bold text-emerald-100 transition"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* ===============================================================
+                  VISTA DEDICADA: DIGITAL TWINS (GEMELOS DIGITALES)
+              =============================================================== */}
+              {activeNav === "twins" && (
+                <div className="space-y-6">
+                  <div className="glass-panel p-6 space-y-5">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <h2 className="text-lg font-extrabold text-white">
+                          Gemelo Digital Agrícola y Logístico — CampoDirecto Twins
+                        </h2>
+                        <p className="text-xs text-[#9ab5a5] mt-1">
+                          Simula producción agrícola, inventario disponible, capacidad de almacenamiento, rutas de transporte, demanda y escenarios de exportación (datos demostrativos).
+                        </p>
+                      </div>
+                      <select
+                        value={selectedFieldId}
+                        onChange={(e) => setSelectedFieldId(e.target.value)}
+                        aria-label="Seleccionar lote para gemelo digital"
+                        className="px-3.5 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/30 text-xs font-bold text-white"
+                      >
+                        {fields.map((f) => (
+                          <option key={f.id} value={f.id}>
+                            {f.name} — {f.crop} ({f.province})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                      <div className="glass-subcard p-4 space-y-2">
+                        <div className="flex justify-between font-bold">
+                          <span>Producción Agrícola</span>
+                          <span className="text-[#67d97b]">{twinProductionPct}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={70}
+                          max={135}
+                          value={twinProductionPct}
+                          onChange={(e) => setTwinProductionPct(Number(e.target.value))}
+                          className="w-full accent-[#38b058]"
+                        />
+                        <p className="text-[11px] text-[#9ab5a5]">
+                          Inventario proyectado: <strong className="text-white">{twinSimulation.projectedProduction} {selectedField.unit}</strong>
+                        </p>
+                      </div>
+
+                      <div className="glass-subcard p-4 space-y-2">
+                        <div className="flex justify-between font-bold">
+                          <span>Demanda Comercial</span>
+                          <span className="text-[#d5a642]">{twinDemandPct}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={70}
+                          max={145}
+                          value={twinDemandPct}
+                          onChange={(e) => setTwinDemandPct(Number(e.target.value))}
+                          className="w-full accent-[#d5a642]"
+                        />
+                        <p className="text-[11px] text-[#9ab5a5]">
+                          Demanda estimada: <strong className="text-white">{twinSimulation.projectedDemand} {selectedField.unit}</strong>
+                        </p>
+                      </div>
+
+                      <div className="glass-subcard p-4 space-y-2">
+                        <div className="flex justify-between font-bold">
+                          <span>Tarifa Transporte / Ruta</span>
+                          <span className="text-emerald-300">{twinTransportPct}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={80}
+                          max={140}
+                          value={twinTransportPct}
+                          onChange={(e) => setTwinTransportPct(Number(e.target.value))}
+                          className="w-full accent-[#67d97b]"
+                        />
+                        <p className="text-[11px] text-[#9ab5a5]">
+                          Ruta: <strong className="text-white">{selectedField.routeSummary}</strong>
+                        </p>
+                      </div>
+
+                      <div className="glass-subcard p-4 space-y-2">
+                        <span className="font-bold block">Escenario de Exportación</span>
+                        <select
+                          value={twinExportScenarioId}
+                          onChange={(e) => setTwinExportScenarioId(e.target.value)}
+                          className="w-full px-2.5 py-2 rounded-xl bg-[#0b1610] border border-[#67d97b]/25 text-xs text-white"
+                        >
+                          {EXPORT_SCENARIOS.map((sc) => (
+                            <option key={sc.id} value={sc.id}>
+                              {sc.label}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="text-[11px] text-[#9ab5a5]">
+                          Tránsito estimado: <strong className="text-[#d5a642]">{selectedExportScenario.transitDays} días</strong>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="glass-subcard p-4">
+                        <span className="text-xs text-[#9ab5a5] block">Capacidad de Almacenamiento</span>
+                        <span className="text-2xl font-extrabold text-white">
+                          {twinSimulation.storageUtilizationPct}%
+                        </span>
+                        <span className="block text-[11px] text-[#9ab5a5] mt-1">
+                          Capacidad bodega: {selectedField.storageCap} {selectedField.unit}
+                          {twinSimulation.storageOverflow > 0
+                            ? ` • Excedente: +${twinSimulation.storageOverflow}`
+                            : " • Sin desborde"}
+                        </span>
+                      </div>
+
+                      <div className="glass-subcard p-4">
+                        <span className="text-xs text-[#9ab5a5] block">Costo Ruta Simulado</span>
+                        <span className="text-2xl font-extrabold text-[#d5a642]">
+                          ${twinSimulation.adjustedRouteCostUsd.toLocaleString()}
+                        </span>
+                        <span className="block text-[11px] text-[#9ab5a5] mt-1">
+                          Escenario: {selectedExportScenario.id.toUpperCase()}
+                        </span>
+                      </div>
+
+                      <div className="glass-subcard p-4">
+                        <span className="text-xs text-[#9ab5a5] block">Ingreso Comercial Simulado</span>
+                        <span className="text-2xl font-extrabold text-[#67d97b]">
+                          ${twinSimulation.simulatedRevenueUsd.toLocaleString()}
+                        </span>
+                        <span className="block text-[11px] text-[#9ab5a5] mt-1">
+                          Precio ref: ${selectedField.priceUsd.toFixed(2)} / {selectedField.unit}
+                        </span>
+                      </div>
+
+                      <div className="glass-subcard p-4 flex flex-col justify-between">
+                        <div>
+                          <span className="text-xs text-[#9ab5a5] block">Twin Health Index</span>
+                          <span className="text-2xl font-extrabold text-white">
+                            {twinSimulation.twinHealthIndex}/100
+                          </span>
+                        </div>
+                        <button
+                          onClick={applyTwinToInventory}
+                          className="mt-2 py-1.5 px-3 rounded-lg bg-[#38b058] hover:bg-[#46c468] text-[#08150e] font-extrabold text-xs transition"
+                        >
+                          Aplicar al Inventario ERP
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ===============================================================
+                  VISTA: CROP MANAGEMENT, FIELD MONITORING & SOIL HEALTH
+              =============================================================== */}
+              {(activeNav === "crops" || activeNav === "fields" || activeNav === "soil") && (
+                <div className="space-y-6">
+                  <form onSubmit={handleAddField} className="glass-panel p-5 space-y-4">
+                    <h2 className="text-base font-extrabold text-white">
+                      Registrar Nuevo Lote / Producto Agrícola (ERP)
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+                      <div>
+                        <label className="block text-[11px] text-[#9ab5a5] mb-1">Nombre Lote / Finca</label>
+                        <input
+                          type="text"
+                          value={newFieldName}
+                          onChange={(e) => setNewFieldName(e.target.value)}
+                          placeholder="Ej. Finca Huaca Norte"
+                          className="w-full px-3 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] text-[#9ab5a5] mb-1">Provincia</label>
+                        <select
+                          value={newFieldProvince}
+                          onChange={(e) => setNewFieldProvince(e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                        >
+                          {["Carchi", "Imbabura", "Pichincha", "Cotopaxi", "Tungurahua", "Chimborazo", "Los Ríos", "Guayas", "El Oro"].map((p) => (
+                            <option key={p} value={p}>{p}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] text-[#9ab5a5] mb-1">Cultivo</label>
+                        <select
+                          value={newFieldCrop}
+                          onChange={(e) => setNewFieldCrop(e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                        >
+                          {ECUADOR_CATALOG_ITEMS.map((c) => (
+                            <option key={c.name} value={c.name}>{c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] text-[#9ab5a5] mb-1">Área (ha)</label>
+                        <input
+                          type="number"
+                          step="0.5"
+                          value={newFieldArea}
+                          onChange={(e) => setNewFieldArea(e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] text-[#9ab5a5] mb-1">Stock / Precio ($)</label>
+                        <div className="flex gap-1.5">
+                          <input
+                            type="number"
+                            value={newFieldStock}
+                            onChange={(e) => setNewFieldStock(e.target.value)}
+                            className="w-1/2 px-2 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                          />
+                          <input
+                            type="number"
+                            step="0.5"
+                            value={newFieldPrice}
+                            onChange={(e) => setNewFieldPrice(e.target.value)}
+                            className="w-1/2 px-2 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="submit"
+                        className="py-2 px-4 rounded-xl bg-[#38b058] hover:bg-[#46c468] text-[#08150e] font-extrabold text-xs transition"
+                      >
+                        + Guardar Lote
+                      </button>
+                    </div>
+                  </form>
+
+                  <div className="glass-panel p-5 overflow-x-auto">
+                    <h3 className="text-sm font-bold text-white mb-3">
+                      Inventario y Monitoreo de Lotes ({filteredFields.length})
+                    </h3>
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b border-[#67d97b]/20 text-[#9ab5a5]">
+                          <th className="py-2.5 px-3">Lote / Finca</th>
+                          <th className="py-2.5 px-3">Ubicación</th>
+                          <th className="py-2.5 px-3">Cultivo</th>
+                          <th className="py-2.5 px-3 text-right">Área</th>
+                          <th className="py-2.5 px-3 text-right">Stock / Cap.</th>
+                          <th className="py-2.5 px-3 text-right">Score</th>
+                          <th className="py-2.5 px-3 text-center">QR</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#67d97b]/10">
+                        {filteredFields.map((f) => (
+                          <tr key={f.id} className="hover:bg-[#1a3a28]/60">
+                            <td className="py-2.5 px-3 font-bold text-white">
+                              {f.name}
+                              <span className="block text-[10px] text-[#9ab5a5] font-mono">{f.lot}</span>
+                            </td>
+                            <td className="py-2.5 px-3 text-emerald-100">{f.city}, {f.province}</td>
+                            <td className="py-2.5 px-3 font-semibold text-[#67d97b]">{f.crop}</td>
+                            <td className="py-2.5 px-3 text-right">{f.areaHa} ha</td>
+                            <td className="py-2.5 px-3 text-right">
+                              <span className={f.stock <= f.minStock ? "text-amber-300 font-bold" : "text-white"}>
+                                {f.stock} / {f.storageCap} {f.unit}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-bold text-[#67d97b]">{f.healthScore}/100</td>
+                            <td className="py-2.5 px-3 text-center">
+                              <button
+                                onClick={() => setQrModalField(f)}
+                                className="px-2.5 py-1 rounded-lg bg-[#1d3f2b] hover:bg-[#29593d] border border-[#67d97b]/30 text-[11px] font-bold text-white"
+                              >
+                                Ver QR
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* ===============================================================
+                  VISTA: WEATHER
+              =============================================================== */}
+              {activeNav === "weather" && (
+                <div className="glass-panel p-6 space-y-4 text-xs">
+                  <h2 className="text-lg font-extrabold text-white">
+                    Clima y Condiciones de Campo — {selectedField.city}, {selectedField.province} (Demo)
+                  </h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    {WEATHER_FORECAST.map((w) => (
+                      <div key={w.day} className="glass-subcard p-4 text-center space-y-1">
+                        <p className="font-bold text-white">{w.day}</p>
+                        <p className="text-2xl">{w.icon}</p>
+                        <p className="text-[#67d97b] font-bold">Máx {w.high}C</p>
+                        <p className="text-[#9ab5a5]">Mín {w.low}C</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ===============================================================
+                  VISTA: CRM & BUYERS
+              =============================================================== */}
+              {activeNav === "crm" && (
+                <div className="space-y-6">
+                  <form onSubmit={handleAddDeal} className="glass-panel p-5 space-y-4">
+                    <h2 className="text-base font-extrabold text-white">
+                      Nueva Oportunidad Comercial (CRM Nacional / Internacional)
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+                      <div>
+                        <label className="block text-[11px] text-[#9ab5a5] mb-1">Empresa / Comprador</label>
+                        <input
+                          type="text"
+                          value={newDealClient}
+                          onChange={(e) => setNewDealClient(e.target.value)}
+                          placeholder="Ej. Andina Foods Corp"
+                          className="w-full px-3 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] text-[#9ab5a5] mb-1">País / Destino</label>
+                        <input
+                          type="text"
+                          value={newDealCountry}
+                          onChange={(e) => setNewDealCountry(e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] text-[#9ab5a5] mb-1">Segmento</label>
+                        <select
+                          value={newDealSegment}
+                          onChange={(e) => setNewDealSegment(e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                        >
+                          <option>Importador</option>
+                          <option>Supermercado</option>
+                          <option>Mayorista</option>
+                          <option>Minorista</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] text-[#9ab5a5] mb-1">Producto</label>
+                        <input
+                          type="text"
+                          value={newDealProduct}
+                          onChange={(e) => setNewDealProduct(e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] text-[#9ab5a5] mb-1">Valor Estimado (USD)</label>
+                        <input
+                          type="number"
+                          value={newDealValue}
+                          onChange={(e) => setNewDealValue(e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        className="py-2 px-4 rounded-xl bg-[#d5a642] text-[#0b1610] font-extrabold text-xs"
+                      >
+                        + Agregar Deal
+                      </button>
+                    </div>
+                  </form>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {["Prospecto", "Cotizado", "Negociación", "Cerrado"].map((stage) => (
+                      <div key={stage} className="glass-panel p-4 space-y-3">
+                        <h3 className="text-xs font-extrabold uppercase text-[#d5a642]">{stage}</h3>
+                        {crmDeals
+                          .filter((d) => d.stage === stage)
+                          .map((deal) => (
+                            <div key={deal.id} className="glass-subcard p-3.5 space-y-1.5 text-xs">
+                              <p className="font-bold text-white">{deal.client}</p>
+                              <p className="text-[11px] text-[#9ab5a5]">
+                                {deal.country} • {deal.segment}
+                              </p>
+                              <p className="text-[11px] text-emerald-100">{deal.product}</p>
+                              <div className="flex items-center justify-between pt-1">
+                                <span className="font-extrabold text-[#67d97b]">
+                                  ${Number(deal.value).toLocaleString()}
+                                </span>
+                                <button
+                                  onClick={() => cycleDealStage(deal.id)}
+                                  className="px-2 py-1 rounded-lg bg-[#1d3f2b] hover:bg-[#29593d] text-[10px] font-bold text-white"
+                                >
+                                  Avanzar ›
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ===============================================================
+                  VISTA: TRADE & CIF CALCULATOR
+              =============================================================== */}
+              {activeNav === "comex" && (
+                <div className="glass-panel p-6 space-y-5">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-white">
+                      Calculadora de Comercio Exterior — Importaciones y Exportaciones
+                    </h2>
+                    <p className="text-xs text-[#d5a642] mt-1">
+                      Estimación configurable con Incoterms 2020 y datos demostrativos. No constituye liquidación aduanera oficial.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-xs">
+                    <div>
+                      <label className="block text-[#9ab5a5] mb-1">Incoterm 2020</label>
+                      <select
+                        value={incoterm}
+                        onChange={(e) => setIncoterm(e.target.value)}
+                        className="w-full px-2.5 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-white font-bold"
+                      >
+                        <option>EXW</option>
+                        <option>FOB</option>
+                        <option>CIF</option>
+                        <option>DDP</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[#9ab5a5] mb-1">FOB (USD)</label>
+                      <input
+                        type="number"
+                        value={fobUsd}
+                        onChange={(e) => setFobUsd(e.target.value)}
+                        className="w-full px-2.5 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#9ab5a5] mb-1">Flete (USD)</label>
+                      <input
+                        type="number"
+                        value={freightUsd}
+                        onChange={(e) => setFreightUsd(e.target.value)}
+                        className="w-full px-2.5 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#9ab5a5] mb-1">Seguro (USD)</label>
+                      <input
+                        type="number"
+                        value={insuranceUsd}
+                        onChange={(e) => setInsuranceUsd(e.target.value)}
+                        className="w-full px-2.5 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#9ab5a5] mb-1">Puerto (USD)</label>
+                      <input
+                        type="number"
+                        value={portUsd}
+                        onChange={(e) => setPortUsd(e.target.value)}
+                        className="w-full px-2.5 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#9ab5a5] mb-1">Aduana (USD)</label>
+                      <input
+                        type="number"
+                        value={customsUsd}
+                        onChange={(e) => setCustomsUsd(e.target.value)}
+                        className="w-full px-2.5 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#9ab5a5] mb-1">Tributo Est. (%)</label>
+                      <input
+                        type="number"
+                        value={taxPct}
+                        onChange={(e) => setTaxPct(e.target.value)}
+                        className="w-full px-2.5 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                    <div className="glass-subcard p-4">
+                      <span className="text-xs text-[#9ab5a5] block">Valor CIF Estimado</span>
+                      <span className="text-2xl font-extrabold text-[#67d97b]">
+                        ${cifUsd.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="glass-subcard p-4">
+                      <span className="text-xs text-[#9ab5a5] block">Tributos Estimados ({taxPct}%)</span>
+                      <span className="text-2xl font-extrabold text-[#d5a642]">
+                        ${estimatedTaxesUsd.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="glass-subcard p-4 border-[#67d97b]/40">
+                      <span className="text-xs text-[#9ab5a5] block">Costo Total Estimado ({incoterm})</span>
+                      <span className="text-2xl font-extrabold text-white">
+                        ${totalLandedUsd.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ===============================================================
+                  VISTA: ECUADOR CATALOG (16 PRODUCTOS)
+              =============================================================== */}
+              {activeNav === "catalog" && (
+                <div className="glass-panel p-6 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h2 className="text-lg font-extrabold text-white">
+                      Catálogo Agrícola de Ecuador — Carchi y Provincias ({ECUADOR_CATALOG_ITEMS.length})
+                    </h2>
+                    <span className="text-xs text-[#9ab5a5]">Precios referenciales de demostración</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                    {ECUADOR_CATALOG_ITEMS.map((item) => (
+                      <div key={item.name} className="glass-subcard p-4 flex flex-col justify-between gap-3 text-xs">
+                        <div>
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className="font-extrabold text-sm text-white">{item.name}</span>
+                            <span className="px-2 py-0.5 rounded bg-[#38b058]/20 text-[#67d97b] text-[10px] font-bold">
+                              {item.tag}
+                            </span>
+                          </div>
+                          <p className="text-[#9ab5a5]">{item.origin}</p>
+                          <p className="text-emerald-100/90 mt-1.5">Calidad: {item.quality}</p>
+                          <p className="text-[#9ab5a5] text-[11px]">Presentación: {item.presentation}</p>
+                        </div>
+                        <div className="pt-2 border-t border-[#67d97b]/15 flex items-baseline justify-between">
+                          <span className="text-base font-extrabold text-[#d5a642]">
+                            ${item.price.toFixed(2)}
+                          </span>
+                          <span className="text-[11px] text-[#9ab5a5]">/ {item.unit}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ===============================================================
+                  VISTA: QR TRACEABILITY & CAMPO AI CHAT
+              =============================================================== */}
+              {activeNav === "trace" && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-5 glass-panel p-5 space-y-4">
+                    <h2 className="text-base font-extrabold text-white">
+                      Trazabilidad QR / Blockchain por Lote
+                    </h2>
+                    <select
+                      value={selectedFieldId}
+                      onChange={(e) => setSelectedFieldId(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                    >
+                      {fields.map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.lot} — {f.crop} ({f.province})
+                        </option>
+                      ))}
+                    </select>
+
+                    <div className="glass-subcard p-4 flex items-center gap-4">
+                      <svg viewBox="0 0 100 100" className="w-24 h-24 shrink-0 bg-white p-1.5 rounded-xl">
+                        <rect x="8" y="8" width="26" height="26" fill="none" stroke="#174D32" strokeWidth="6" />
+                        <rect x="16" y="16" width="10" height="10" fill="#174D32" />
+                        <rect x="66" y="8" width="26" height="26" fill="none" stroke="#174D32" strokeWidth="6" />
+                        <rect x="74" y="16" width="10" height="10" fill="#174D32" />
+                        <rect x="8" y="66" width="26" height="26" fill="none" stroke="#174D32" strokeWidth="6" />
+                        <rect x="16" y="74" width="10" height="10" fill="#174D32" />
+                        <rect x="44" y="14" width="12" height="12" fill="#36834A" />
+                        <rect x="44" y="44" width="14" height="14" fill="#d5a642" />
+                        <rect x="66" y="44" width="12" height="12" fill="#174D32" />
+                        <rect x="44" y="70" width="24" height="12" fill="#36834A" />
+                      </svg>
+                      <div className="text-xs space-y-1">
+                        <p className="font-bold text-white">{selectedField.crop}</p>
+                        <p className="text-[#9ab5a5]">Productor: {selectedField.producer}</p>
+                        <p className="text-[#9ab5a5]">Origen: {selectedField.city}, {selectedField.province}</p>
+                        <p className="text-[#9ab5a5]">Cosecha: {selectedField.harvestDate}</p>
+                        <p className="font-mono text-[11px] text-[#67d97b]">Hash Demo: {selectedField.txHash}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-7 glass-panel p-5 space-y-4">
+                    <h2 className="text-base font-extrabold text-white">
+                      Asistente CampoDirecto AI
+                    </h2>
+                    <div className="space-y-2.5 max-h-64 overflow-y-auto glass-subcard p-3.5 text-xs">
+                      {aiChat.map((m, idx) => (
+                        <div
+                          key={idx}
+                          className={`p-3 rounded-xl max-w-[88%] ${
+                            m.role === "ai"
+                              ? "bg-[#152d20] border border-[#67d97b]/20 text-white"
+                              : "bg-[#d5a642] text-[#0b1610] font-semibold ml-auto"
+                          }`}
+                        >
+                          {m.text}
+                        </div>
+                      ))}
+                    </div>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSendAi();
+                      }}
+                      className="flex gap-2"
+                    >
+                      <input
+                        type="text"
+                        value={aiInput}
+                        onChange={(e) => setAiInput(e.target.value)}
+                        placeholder="Pregunta sobre gemelo digital, Papa en Tulcán o CIF..."
+                        className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#0e2016] border border-[#67d97b]/25 text-xs text-white"
+                      />
+                      <button
+                        type="submit"
+                        className="px-4 py-2.5 rounded-xl bg-[#38b058] text-[#08150e] font-extrabold text-xs"
+                      >
+                        Enviar
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              )}
+
+              {/* ===============================================================
+                  VISTA: ROLES & SECURITY (11 PERFILES)
+              =============================================================== */}
+              {activeNav === "roles" && (
+                <div className="glass-panel p-6 space-y-4 text-xs">
+                  <h2 className="text-lg font-extrabold text-white">
+                    Roles, Permisos y Seguridad — CampoDirecto
+                  </h2>
+                  <p className="text-[#9ab5a5]">
+                    Rol activo: <strong className="text-[#67d97b]">{role}</strong>. Perfiles contemplados en el ecosistema CampoDirecto:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {ROLES_LIST.map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => {
+                          setRole(r);
+                          triggerToast(`Rol cambiado a ${r}`);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl font-bold border transition ${
+                          r === role
+                            ? "bg-[#38b058] text-[#08150e] border-[#67d97b]"
+                            : "bg-[#152c1f] text-emerald-100 border-[#67d97b]/20 hover:bg-[#1d3e2b]"
+                        }`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </main>
+          </div>
+
+          {showAllTasksModal && (
+            <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+              <div className="glass-panel max-w-md w-full p-5 space-y-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-extrabold text-sm text-white">Todas las Tareas Operativas (ERP)</h3>
+                  <button
+                    onClick={() => setShowAllTasksModal(false)}
+                    className="px-2 py-1 rounded-lg bg-white/10 text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {tasks.map((t) => (
+                    <div key={t.id} className="glass-subcard p-3 flex justify-between items-center gap-2">
+                      <div>
+                        <p className="font-bold text-white">{t.title}</p>
+                        <p className="text-[11px] text-[#9ab5a5]">{t.field} • {t.date}</p>
+                      </div>
+                      <span className="px-2 py-0.5 rounded bg-[#38b058]/20 text-[#67d97b] font-bold">
+                        {t.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {qrModalField && (
+            <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+              <div className="glass-panel max-w-sm w-full p-5 space-y-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-extrabold text-white">Pasaporte QR — {qrModalField.lot}</h3>
+                  <button
+                    onClick={() => setQrModalField(null)}
+                    className="px-2 py-1 rounded-lg bg-white/10 text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <p className="text-[#9ab5a5]">
+                  {qrModalField.crop} • {qrModalField.city}, {qrModalField.province}
+                </p>
+                <p className="font-mono text-[#67d97b]">Tx Simulación: {qrModalField.txHash}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
